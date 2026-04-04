@@ -1,0 +1,79 @@
+[project]
+name = "dash-reportbuilder"
+dynamic = ["version"]
+description = "Capture, assemble, and export reports from Plotly Dash applications"
+keywords = ["plotly", "dash", "report", "export", "docx", "pptx", "typst", "pdf"]
+classifiers = [
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Operating System :: OS Independent",
+]
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Simon Niederberger", email = "s.niederberger@hotmail.com" },
+]
+maintainers = [
+    { name = "Simon Niederberger", email = "s.niederberger@hotmail.com" },
+]
+requires-python = ">=3.10"
+dependencies = [
+    "dash>=4.0.0",
+    "dash-capture",
+]
+
+[project.optional-dependencies]
+docx = ["python-docx>=1.1.0"]
+pptx = ["python-pptx>=1.0.0"]
+all = ["python-docx>=1.1.0", "python-pptx>=1.0.0"]
+
+[project.urls]
+Homepage = "https://github.com/saemeon/dash-reportbuilder"
+Repository = "https://github.com/saemeon/dash-reportbuilder"
+
+[dependency-groups]
+test = ["pytest", "pytest-cov"]
+dev = [
+    "ruff",
+    "prek",
+    "ty",
+    "python-docx>=1.1.0",
+    "python-pptx>=1.0.0",
+    { include-group = "test" },
+]
+
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+local_scheme = "no-local-version"
+write_to = "src/dash_reportbuilder/_version.py"
+
+[tool.setuptools.dynamic]
+version = { attr = "dash_reportbuilder._version.__version__" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+dash_reportbuilder = ["py.typed", "assets/*.js"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--cov=src --cov-report=term-missing"
+
+[tool.ty.src]
+include = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP", "B", "C4", "SIM", "PERF"]
+ignore = ["E203", "E501"]
