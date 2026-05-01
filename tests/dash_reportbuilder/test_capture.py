@@ -4,7 +4,7 @@
 from dash_capture import WizardAction
 
 from dash_reportbuilder.capture import _bump_version, get_version, report_action
-from dash_reportbuilder.model import ItemType
+from dash_reportbuilder.elements import ImageElement
 from dash_reportbuilder.store import MemoryStore
 
 
@@ -23,18 +23,20 @@ def test_report_action_callback_appends_item():
 
     report = store.get("test")
     assert len(report.items) == 1
-    assert report.items[0].type == ItemType.IMAGE
-    assert report.items[0].content == "data:image/png;base64,abc123"
+    item = report.items[0]
+    assert isinstance(item, ImageElement)
+    assert item.data_uri == "data:image/png;base64,abc123"
 
 
-def test_report_action_callback_passes_kwargs_as_meta():
+def test_report_action_callback_passes_kwargs_as_attributes():
     store = MemoryStore()
     action = report_action(store, session_id="test")
 
     action.callback("data:image/png;base64,x", caption="Chart 1", title="Foo")
 
-    report = store.get("test")
-    assert report.items[0].meta == {"caption": "Chart 1", "title": "Foo"}
+    item = store.get("test").items[0]
+    assert item.title == "Foo"
+    assert item.caption == "Chart 1"
 
 
 def test_report_action_callback_filters_none_kwargs():
@@ -43,8 +45,9 @@ def test_report_action_callback_filters_none_kwargs():
 
     action.callback("data:image/png;base64,x", caption=None, title="Foo")
 
-    report = store.get("test")
-    assert report.items[0].meta == {"title": "Foo"}
+    item = store.get("test").items[0]
+    assert item.title == "Foo"
+    assert item.caption is None
 
 
 def test_version_counter():
@@ -64,9 +67,6 @@ def test_report_action_bumps_version():
 
     v1 = get_version(store)
     assert v1 > v0
-
-
-# --- Additional tests ---
 
 
 def test_report_action_custom_label():
@@ -93,8 +93,8 @@ def test_report_action_multiple_captures():
     report = store.get("multi")
     assert len(report.items) == 5
     for i, item in enumerate(report.items):
-        assert item.content == f"data:image/png;base64,img{i}"
-        assert item.type == ItemType.IMAGE
+        assert isinstance(item, ImageElement)
+        assert item.data_uri == f"data:image/png;base64,img{i}"
 
 
 def test_version_independent_per_store():
@@ -123,19 +123,11 @@ def test_bump_version_returns_new_value():
     assert v == 2
 
 
-def test_callback_all_none_kwargs_empty_meta():
-    store = MemoryStore()
-    action = report_action(store, session_id="t")
-    action.callback("data:image/png;base64,x", caption=None, source=None)
-    report = store.get("t")
-    assert report.items[0].meta == {}
-
-
 def test_callback_preserves_item_order():
     store = MemoryStore()
     action = report_action(store, session_id="order")
     action.callback("data:image/png;base64,first")
     action.callback("data:image/png;base64,second")
     report = store.get("order")
-    assert report.items[0].content == "data:image/png;base64,first"
-    assert report.items[1].content == "data:image/png;base64,second"
+    assert report.items[0].data_uri == "data:image/png;base64,first"
+    assert report.items[1].data_uri == "data:image/png;base64,second"

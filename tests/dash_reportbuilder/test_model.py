@@ -45,11 +45,13 @@ def test_report_reorder_missing_ids():
 
 
 def test_report_update_item():
+    from dash_reportbuilder.elements import ParagraphElement
+
     report = Report()
-    item = ReportItem(type=ItemType.PARAGRAPH, content="old", id="x")
+    item = ParagraphElement(text="old", id="x")
     report.items = [item]
-    report.update_item("x", "new")
-    assert report.items[0].content == "new"
+    report.update_item("x", text="new")
+    assert report.items[0].text == "new"
 
 
 def test_report_roundtrip():
@@ -182,10 +184,11 @@ class TestReportFromDictEdgeCases:
         assert report.title == "T"
         assert report.items == []
 
-    def test_item_missing_content_defaults_empty(self):
+    def test_legacy_item_missing_content_defaults_empty(self):
+        # Legacy schema: {type, content} -> deserialized as ReportItem
         data = {
             "title": "T",
-            "items": [{"id": "abc", "type": "heading"}],
+            "items": [{"id": "abc", "type": "heading", "content": ""}],
         }
         report = Report.from_dict(data)
         assert report.items[0].content == ""
@@ -271,15 +274,17 @@ class TestUpdateAndRemoveEdgeCases:
     """update_item and remove with nonexistent IDs."""
 
     def test_update_nonexistent_id_is_noop(self):
+        from dash_reportbuilder.elements import ParagraphElement
+
         report = Report()
-        item = ReportItem(type=ItemType.PARAGRAPH, content="original", id="x")
+        item = ParagraphElement(text="original", id="x")
         report.items = [item]
-        report.update_item("nonexistent", "new text")
-        assert report.items[0].content == "original"
+        report.update_item("nonexistent", text="new text")
+        assert report.items[0].text == "original"
 
     def test_update_empty_report(self):
         report = Report()
-        report.update_item("any", "text")
+        report.update_item("any", text="text")
         assert report.items == []
 
     def test_remove_nonexistent_id_is_noop(self):

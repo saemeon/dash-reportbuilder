@@ -6,7 +6,7 @@ import io
 from dash_reportbuilder.export._base import DocxTemplate
 from dash_reportbuilder.model import ItemType, Report, ReportItem
 
-from .conftest import TINY_PNG_URI
+TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
 
 
 def test_export_docx_produces_bytes(sample_report):
