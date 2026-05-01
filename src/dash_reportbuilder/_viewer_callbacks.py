@@ -11,8 +11,14 @@ import dash
 from dash import ALL, Input, Output, State, dcc
 
 from dash_reportbuilder._viewer_layout import render_item_list
+from dash_reportbuilder.backends import DocxBackend, PptxBackend, TypstBackend
 from dash_reportbuilder.capture import _bump_version, get_version
-from dash_reportbuilder.model import ItemType, ReportItem
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    PageBreakElement,
+    ParagraphElement,
+)
 from dash_reportbuilder.store import ReportStore
 
 
@@ -111,19 +117,17 @@ def register_viewer_callbacks(
         for prop_info, val in zip(prop_ids, values):
             if prop_info["id"]["index"] == item_id:
                 report = store.get(session_id)
-                report.update_item(item_id, val or "")
+                # Legacy ReportItem stores text in `content`; new typed
+                # elements store it in `text`.  Try both so both work.
+                report.update_item(item_id, content=val or "", text=val or "")
                 store.put(session_id, report)
                 return dash.no_update
         return dash.no_update
 
     # ---- Add text items ----
-    def _add_item(item_type: ItemType, default_content: str = "") -> int:
-        meta = {}
-        if item_type == ItemType.HEADING:
-            meta["heading_level"] = 2
-        item = ReportItem(type=item_type, content=default_content, meta=meta)
+    def _add(element) -> int:
         report = store.get(session_id)
-        report.append(item)
+        report.add(element)
         store.put(session_id, report)
         return _bump_version(store)
 
@@ -135,7 +139,7 @@ def register_viewer_callbacks(
     def add_heading(n):
         if not n:
             return dash.no_update
-        return _add_item(ItemType.HEADING, "Section Title")
+        return _add(HeadingElement(text="Section Title", level=2))
 
     @dash.callback(
         Output(version_id, "data", allow_duplicate=True),
@@ -145,7 +149,7 @@ def register_viewer_callbacks(
     def add_paragraph(n):
         if not n:
             return dash.no_update
-        return _add_item(ItemType.PARAGRAPH)
+        return _add(ParagraphElement(text=""))
 
     @dash.callback(
         Output(version_id, "data", allow_duplicate=True),
@@ -155,7 +159,7 @@ def register_viewer_callbacks(
     def add_caption(n):
         if not n:
             return dash.no_update
-        return _add_item(ItemType.CAPTION)
+        return _add(CaptionElement(text=""))
 
     @dash.callback(
         Output(version_id, "data", allow_duplicate=True),
@@ -165,7 +169,7 @@ def register_viewer_callbacks(
     def add_pagebreak(n):
         if not n:
             return dash.no_update
-        return _add_item(ItemType.PAGE_BREAK)
+        return _add(PageBreakElement())
 
     # ---- Update title ----
     @dash.callback(
@@ -208,23 +212,20 @@ def register_viewer_callbacks(
         template = (templates or {}).get(fmt)
 
         if fmt == "docx":
-            from dash_reportbuilder.export._docx import export_docx
-
-            data = export_docx(report, template=template)
+            backend = DocxBackend(template=template, title=report.title)
+            data = report.export(backend)
             return dcc.send_bytes(data, f"{report.title}.docx")
         elif fmt == "pptx":
-            from dash_reportbuilder.export._pptx import export_pptx
-
-            data = export_pptx(report, template=template)
+            backend = PptxBackend(template=template)
+            data = report.export(backend)
             return dcc.send_bytes(data, f"{report.title}.pptx")
         elif fmt == "typst":
-            from dash_reportbuilder.export._typst import export_typst
-
-            source = export_typst(report, template=template)
-            return dcc.send_string(source, f"{report.title}.typ")
+            backend = TypstBackend(template=template, title=report.title)
+            for item in report.items:
+                item.render_into(backend)
+            return dcc.send_string(backend.build_source(), f"{report.title}.typ")
         elif fmt == "pdf":
-            from dash_reportbuilder.export._typst import export_pdf
-
-            data = export_pdf(report, template=template)
+            backend = TypstBackend(template=template, title=report.title)
+            data = report.export(backend)
             return dcc.send_bytes(data, f"{report.title}.pdf")
         return dash.no_update

@@ -11,14 +11,38 @@ except PackageNotFoundError:
     __version__ = "unknown"
 
 from dash_reportbuilder.capture import get_version, report_action
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    ImageElement,
+    ItemType,
+    PageBreakElement,
+    ParagraphElement,
+    ReportItem,
+    element_from_dict,
+    register_element_type,
+)
+from dash_reportbuilder.backends import DocxBackend, PptxBackend, TypstBackend
 from dash_reportbuilder.export._base import DocxTemplate, PptxTemplate, TypstTemplate
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.model import Report
+from dash_reportbuilder.protocols import ReportBackend, ReportElement
 from dash_reportbuilder.store import FileStore, MemoryStore, ReportStore
 from dash_reportbuilder.viewer import report_viewer
 
 __all__ = [
-    # model
+    # model + protocols
     "Report",
+    "ReportElement",
+    "ReportBackend",
+    # elements
+    "HeadingElement",
+    "ParagraphElement",
+    "ImageElement",
+    "CaptionElement",
+    "PageBreakElement",
+    "element_from_dict",
+    "register_element_type",
+    # legacy element shim
     "ReportItem",
     "ItemType",
     # store
@@ -30,6 +54,10 @@ __all__ = [
     "get_version",
     # viewer
     "report_viewer",
+    # backends
+    "DocxBackend",
+    "PptxBackend",
+    "TypstBackend",
     # templates
     "DocxTemplate",
     "PptxTemplate",

@@ -9,23 +9,25 @@ from typing import Any
 
 from dash_capture import WizardAction
 
-from dash_reportbuilder.model import ItemType, ReportItem
+from dash_reportbuilder.elements import ImageElement
 from dash_reportbuilder.store import ReportStore
 
 # Global version counters per store — bumped on every mutation so the
-# viewer knows to refresh.  Keyed by id(store).
-_version_counters: dict[int, int] = {}
+# viewer knows to refresh.  WeakKeyDictionary avoids id() collisions when
+# a store is garbage-collected and the next allocation reuses its id.
+from weakref import WeakKeyDictionary
+
+_version_counters: WeakKeyDictionary[ReportStore, int] = WeakKeyDictionary()
 
 
 def _bump_version(store: ReportStore) -> int:
-    key = id(store)
-    _version_counters[key] = _version_counters.get(key, 0) + 1
-    return _version_counters[key]
+    _version_counters[store] = _version_counters.get(store, 0) + 1
+    return _version_counters[store]
 
 
 def get_version(store: ReportStore) -> int:
     """Return the current mutation version for *store*."""
-    return _version_counters.get(id(store), 0)
+    return _version_counters.get(store, 0)
 
 
 def report_action(
@@ -53,10 +55,14 @@ def report_action(
     """
 
     def _on_capture(data_uri: str, **kwargs: Any) -> None:
-        meta = {k: v for k, v in kwargs.items() if v is not None}
-        item = ReportItem(type=ItemType.IMAGE, content=data_uri, meta=meta)
+        item = ImageElement(
+            data_uri=data_uri,
+            title=kwargs.get("title"),
+            caption=kwargs.get("caption"),
+            width_mm=kwargs.get("width_mm"),
+        )
         report = store.get(session_id)
-        report.append(item)
+        report.add(item)
         store.put(session_id, report)
         _bump_version(store)
 

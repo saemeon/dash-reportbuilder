@@ -7,7 +7,17 @@ from __future__ import annotations
 
 from dash import dcc, html
 
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    ImageElement,
+    ItemType,
+    PageBreakElement,
+    ParagraphElement,
+    ReportItem,
+)
+from dash_reportbuilder.model import Report
+from dash_reportbuilder.protocols import ReportElement
 
 _ITEM_STYLE = {
     "display": "flex",
@@ -37,19 +47,57 @@ _DELETE_STYLE = {
 }
 
 
-def render_item(item: ReportItem) -> html.Div:
-    """Render a single report item as a Div with drag handle + content + delete."""
-    if item.type == ItemType.IMAGE:
+def _classify(item: ReportElement) -> tuple[str, str, str | None]:
+    """Return (kind, text, image_src).
+
+    ``kind`` is one of: image, heading, paragraph, caption, page_break, custom.
+    ``text`` is the editable text (empty for image/page_break/custom).
+    ``image_src`` is the data URI for image items, otherwise None.
+    """
+    # New typed elements
+    if isinstance(item, ImageElement):
+        return "image", "", item.data_uri
+    if isinstance(item, HeadingElement):
+        return "heading", item.text, None
+    if isinstance(item, ParagraphElement):
+        return "paragraph", item.text, None
+    if isinstance(item, CaptionElement):
+        return "caption", item.text, None
+    if isinstance(item, PageBreakElement):
+        return "page_break", "", None
+
+    # Legacy ReportItem
+    if isinstance(item, ReportItem):
+        if item.type == ItemType.IMAGE:
+            return "image", "", item.content
+        if item.type == ItemType.PAGE_BREAK:
+            return "page_break", "", None
+        return item.type.value, item.content, None
+
+    return "custom", "", None
+
+
+def render_item(item: ReportElement) -> html.Div:
+    """Render a single report element with drag handle + content + delete."""
+    kind, text, image_src = _classify(item)
+    item_id = getattr(item, "id", "")
+
+    if kind == "image":
         content = html.Img(
-            src=item.content,
+            src=image_src,
             style={"maxWidth": "200px", "maxHeight": "150px"},
         )
-    elif item.type == ItemType.PAGE_BREAK:
+    elif kind == "page_break":
         content = html.Hr(style={"flex": "1", "margin": "0"})
+    elif kind == "custom":
+        content = html.Div(
+            f"<{type(item).__name__}>",
+            style={"flex": "1", "color": "#666", "fontStyle": "italic"},
+        )
     else:
         content = dcc.Input(
-            id={"type": "drb-text", "index": item.id},
-            value=item.content,
+            id={"type": "drb-text", "index": item_id},
+            value=text,
             type="text",
             debounce=True,
             style={
@@ -58,20 +106,20 @@ def render_item(item: ReportItem) -> html.Div:
                 "border": "1px solid #ddd",
                 "borderRadius": "3px",
                 "padding": "4px 8px",
-                "fontWeight": "bold" if item.type == ItemType.HEADING else "normal",
-                "fontStyle": "italic" if item.type == ItemType.CAPTION else "normal",
-                "fontSize": "16px" if item.type == ItemType.HEADING else "13px",
+                "fontWeight": "bold" if kind == "heading" else "normal",
+                "fontStyle": "italic" if kind == "caption" else "normal",
+                "fontSize": "16px" if kind == "heading" else "13px",
             },
         )
 
-    type_label = item.type.value.replace("_", " ").title()
+    type_label = kind.replace("_", " ").title()
 
     return html.Div(
-        id=f"drb-item-{item.id}",
+        id=f"drb-item-{item_id}",
         style=_ITEM_STYLE,
         className="drb-item",
         children=[
-            html.Span("\u2261", className="drb-drag-handle", style=_DRAG_HANDLE_STYLE),
+            html.Span("≡", className="drb-drag-handle", style=_DRAG_HANDLE_STYLE),
             html.Span(
                 type_label,
                 style={
@@ -83,8 +131,8 @@ def render_item(item: ReportItem) -> html.Div:
             ),
             html.Div(content, style={"flex": "1"}),
             html.Button(
-                "\u2715",
-                id={"type": "drb-delete", "index": item.id},
+                "✕",
+                id={"type": "drb-delete", "index": item_id},
                 style=_DELETE_STYLE,
                 title="Remove",
             ),
