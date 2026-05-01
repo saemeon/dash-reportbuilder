@@ -11,10 +11,8 @@ from dash_reportbuilder.elements import (
     CaptionElement,
     HeadingElement,
     ImageElement,
-    ItemType,
     PageBreakElement,
     ParagraphElement,
-    ReportItem,
 )
 from dash_reportbuilder.model import Report
 from dash_reportbuilder.protocols import ReportElement
@@ -54,7 +52,6 @@ def _classify(item: ReportElement) -> tuple[str, str, str | None]:
     ``text`` is the editable text (empty for image/page_break/custom).
     ``image_src`` is the data URI for image items, otherwise None.
     """
-    # New typed elements
     if isinstance(item, ImageElement):
         return "image", "", item.data_uri
     if isinstance(item, HeadingElement):
@@ -65,15 +62,6 @@ def _classify(item: ReportElement) -> tuple[str, str, str | None]:
         return "caption", item.text, None
     if isinstance(item, PageBreakElement):
         return "page_break", "", None
-
-    # Legacy ReportItem
-    if isinstance(item, ReportItem):
-        if item.type == ItemType.IMAGE:
-            return "image", "", item.content
-        if item.type == ItemType.PAGE_BREAK:
-            return "page_break", "", None
-        return item.type.value, item.content, None
-
     return "custom", "", None
 
 

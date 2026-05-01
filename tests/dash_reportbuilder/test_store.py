@@ -5,7 +5,12 @@ import tempfile
 import threading
 from pathlib import Path
 
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.elements import (
+    HeadingElement,
+    ImageElement,
+    ParagraphElement,
+)
+from dash_reportbuilder.model import Report
 from dash_reportbuilder.store import FileStore, MemoryStore, ReportStore
 
 
@@ -19,18 +24,18 @@ def test_memory_store_get_creates_empty():
 def test_memory_store_put_get():
     store = MemoryStore()
     report = store.get("session1")
-    report.append(ReportItem(type=ItemType.HEADING, content="Hello"))
+    report.append(HeadingElement(text="Hello", level=2))
     store.put("session1", report)
 
     loaded = store.get("session1")
     assert len(loaded.items) == 1
-    assert loaded.items[0].content == "Hello"
+    assert loaded.items[0].text == "Hello"
 
 
 def test_memory_store_delete():
     store = MemoryStore()
     report = store.get("s1")
-    report.append(ReportItem(type=ItemType.HEADING, content="X"))
+    report.append(HeadingElement(text="X", level=2))
     store.put("s1", report)
     store.delete("s1")
     assert store.get("s1").items == []
@@ -39,7 +44,7 @@ def test_memory_store_delete():
 def test_memory_store_isolation():
     store = MemoryStore()
     r1 = store.get("s1")
-    r1.append(ReportItem(type=ItemType.HEADING, content="A"))
+    r1.append(HeadingElement(text="A", level=2))
     store.put("s1", r1)
 
     r2 = store.get("s2")
@@ -50,13 +55,13 @@ def test_file_store_roundtrip():
     with tempfile.TemporaryDirectory() as tmpdir:
         store = FileStore(tmpdir)
         report = store.get("session1")
-        report.append(ReportItem(type=ItemType.IMAGE, content="data:image/png;base64,abc"))
+        report.append(ImageElement(data_uri="data:image/png;base64,abc"))
         report.title = "My Report"
         store.put("session1", report)
 
         loaded = store.get("session1")
         assert len(loaded.items) == 1
-        assert loaded.items[0].content == "data:image/png;base64,abc"
+        assert loaded.items[0].data_uri == "data:image/png;base64,abc"
         assert loaded.title == "My Report"
 
 
@@ -64,7 +69,7 @@ def test_file_store_delete():
     with tempfile.TemporaryDirectory() as tmpdir:
         store = FileStore(tmpdir)
         report = store.get("s1")
-        report.append(ReportItem(type=ItemType.HEADING, content="X"))
+        report.append(HeadingElement(text="X", level=2))
         store.put("s1", report)
 
         store.delete("s1")
@@ -98,9 +103,7 @@ class TestFileStorePathSanitization:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = FileStore(tmpdir)
             path = store._path("../../etc/passwd")
-            # The resolved path must be inside the store directory
             assert str(path).startswith(str(store._dir))
-            # ".." should have been replaced with "_"
             assert ".." not in path.name
 
     def test_slash_sanitized(self):
@@ -115,7 +118,6 @@ class TestFileStorePathSanitization:
             store = FileStore(tmpdir)
             report = Report(title="evil")
             store.put("../../../tmp/evil", report)
-            # File should be inside tmpdir, not in /tmp
             written_files = list(Path(tmpdir).glob("*.json"))
             assert len(written_files) == 1
             assert written_files[0].parent == Path(tmpdir)
@@ -125,7 +127,7 @@ class TestFileStorePathSanitization:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = FileStore(tmpdir)
             report = Report(title="safe")
-            report.append(ReportItem(type=ItemType.HEADING, content="H"))
+            report.append(HeadingElement(text="H", level=2))
             store.put("../bad", report)
             loaded = store.get("../bad")
             assert loaded.title == "safe"
@@ -143,7 +145,7 @@ class TestMemoryStoreThreadSafety:
             try:
                 for i in range(n):
                     report = Report(title=f"{session}-{i}")
-                    report.append(ReportItem(type=ItemType.PARAGRAPH, content=f"item-{i}"))
+                    report.append(ParagraphElement(text=f"item-{i}"))
                     store.put(session, report)
             except Exception as exc:
                 errors.append(exc)
@@ -158,7 +160,6 @@ class TestMemoryStoreThreadSafety:
             th.join()
 
         assert errors == []
-        # Each session should have a valid report with exactly 1 item
         for t in range(10):
             r = store.get(f"session-{t}")
             assert len(r.items) == 1
@@ -202,13 +203,13 @@ class TestFileStoreMultipleSessions:
             store = FileStore(tmpdir)
             for sid in ["alpha", "beta", "gamma"]:
                 r = Report(title=sid)
-                r.append(ReportItem(type=ItemType.HEADING, content=f"Title for {sid}"))
+                r.append(HeadingElement(text=f"Title for {sid}", level=2))
                 store.put(sid, r)
 
             for sid in ["alpha", "beta", "gamma"]:
                 loaded = store.get(sid)
                 assert loaded.title == sid
-                assert loaded.items[0].content == f"Title for {sid}"
+                assert loaded.items[0].text == f"Title for {sid}"
 
     def test_delete_one_session_keeps_others(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -218,7 +219,7 @@ class TestFileStoreMultipleSessions:
 
             store.delete("b")
             assert store.get("a").title == "a"
-            assert store.get("b").title == "Untitled Report"  # recreated empty
+            assert store.get("b").title == "Untitled Report"
             assert store.get("c").title == "c"
 
     def test_file_count_matches_sessions(self):
@@ -236,12 +237,12 @@ class TestPutOverwrites:
     def test_memory_store_put_overwrites(self):
         store = MemoryStore()
         r1 = Report(title="first")
-        r1.append(ReportItem(type=ItemType.HEADING, content="H1"))
+        r1.append(HeadingElement(text="H1", level=2))
         store.put("s", r1)
 
         r2 = Report(title="second")
-        r2.append(ReportItem(type=ItemType.PARAGRAPH, content="P"))
-        r2.append(ReportItem(type=ItemType.PARAGRAPH, content="Q"))
+        r2.append(ParagraphElement(text="P"))
+        r2.append(ParagraphElement(text="Q"))
         store.put("s", r2)
 
         loaded = store.get("s")
@@ -252,7 +253,7 @@ class TestPutOverwrites:
         with tempfile.TemporaryDirectory() as tmpdir:
             store = FileStore(tmpdir)
             r1 = Report(title="v1")
-            r1.append(ReportItem(type=ItemType.HEADING, content="old"))
+            r1.append(HeadingElement(text="old", level=2))
             store.put("s", r1)
 
             r2 = Report(title="v2")
@@ -268,9 +269,9 @@ class TestDeleteNonexistent:
 
     def test_memory_store_delete_nonexistent(self):
         store = MemoryStore()
-        store.delete("does-not-exist")  # should not raise
+        store.delete("does-not-exist")
 
     def test_file_store_delete_nonexistent(self):
         with tempfile.TemporaryDirectory() as tmpdir:
             store = FileStore(tmpdir)
-            store.delete("does-not-exist")  # should not raise
+            store.delete("does-not-exist")

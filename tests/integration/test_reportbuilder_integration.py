@@ -52,11 +52,13 @@ def _build_app():
         actions=[report_action(store)],
     )
 
-    app.layout = html.Div([
-        graph,
-        wizard,
-        html.Div(id="report-panel", children=[report_viewer(store)]),
-    ])
+    app.layout = html.Div(
+        [
+            graph,
+            wizard,
+            html.Div(id="report-panel", children=[report_viewer(store)]),
+        ]
+    )
     return app, store
 
 
@@ -83,8 +85,8 @@ def test_add_heading_button(dash_duo):
     # Verify it's in the store
     report = store.get("default")
     assert len(report.items) == 1
-    assert report.items[0].type.value == "heading"
-    assert report.items[0].content == "Section Title"
+    assert report.items[0].type == "heading"
+    assert report.items[0].text == "Section Title"
 
 
 def test_add_paragraph_button(dash_duo):
@@ -102,7 +104,7 @@ def test_add_paragraph_button(dash_duo):
     )
     report = store.get("default")
     assert len(report.items) == 1
-    assert report.items[0].type.value == "paragraph"
+    assert report.items[0].type == "paragraph"
 
 
 def test_add_multiple_items(dash_duo):
@@ -131,7 +133,7 @@ def test_add_multiple_items(dash_duo):
 
     report = store.get("default")
     assert len(report.items) == 3
-    assert [it.type.value for it in report.items] == ["heading", "paragraph", "caption"]
+    assert [it.type for it in report.items] == ["heading", "paragraph", "caption"]
 
 
 def test_delete_item(dash_duo):
@@ -161,7 +163,7 @@ def test_delete_item(dash_duo):
     )
     report = store.get("default")
     assert len(report.items) == 1
-    assert report.items[0].type.value == "paragraph"
+    assert report.items[0].type == "paragraph"
 
 
 def test_reorder_persists_to_export():
@@ -173,16 +175,16 @@ def test_reorder_persists_to_export():
     separately by manual testing since dash_clientside.set_props
     cannot be reliably triggered from Selenium.
     """
-    from dash_reportbuilder import MemoryStore, Report, ReportItem, ItemType
+    from dash_reportbuilder import HeadingElement, MemoryStore
     from dash_reportbuilder.export._docx import export_docx
     from docx import Document
     import io
 
     store = MemoryStore()
     report = store.get("default")
-    report.append(ReportItem(type=ItemType.HEADING, content="First", id="aaa"))
-    report.append(ReportItem(type=ItemType.HEADING, content="Second", id="bbb"))
-    report.append(ReportItem(type=ItemType.HEADING, content="Third", id="ccc"))
+    report.append(HeadingElement(text="First", level=2, id="aaa"))
+    report.append(HeadingElement(text="Second", level=2, id="bbb"))
+    report.append(HeadingElement(text="Third", level=2, id="ccc"))
     store.put("default", report)
 
     # Reorder: reverse

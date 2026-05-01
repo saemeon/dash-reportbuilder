@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import uuid
 from dataclasses import dataclass, field
-from enum import Enum
 from typing import Any, ClassVar
 
 from dash_reportbuilder.protocols import ReportBackend, ReportElement
@@ -38,7 +37,12 @@ class HeadingElement:
         backend.add_heading(self.text, self.level)
 
     def to_dict(self) -> dict[str, Any]:
-        return {"id": self.id, "type": self.type, "text": self.text, "level": self.level}
+        return {
+            "id": self.id,
+            "type": self.type,
+            "text": self.text,
+            "level": self.level,
+        }
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> HeadingElement:
@@ -146,71 +150,6 @@ class PageBreakElement:
 
 
 # ---------------------------------------------------------------------------
-# Legacy compat shim — ReportItem / ItemType
-# ---------------------------------------------------------------------------
-
-
-class ItemType(str, Enum):
-    """Legacy item type (kept for backwards compatibility)."""
-
-    IMAGE = "image"
-    HEADING = "heading"
-    PARAGRAPH = "paragraph"
-    CAPTION = "caption"
-    PAGE_BREAK = "page_break"
-
-
-@dataclass
-class ReportItem:
-    """Legacy generic item (kept for backwards compatibility).
-
-    Implements :class:`~dash_reportbuilder.protocols.ReportElement` by
-    dispatching to the backend primitives based on ``type``.  New code
-    should use the typed element classes (:class:`HeadingElement`,
-    :class:`ImageElement`, etc.) directly.
-    """
-
-    type: ItemType
-    content: str = ""
-    id: str = field(default_factory=_new_id)
-    meta: dict[str, Any] = field(default_factory=dict)
-
-    def render_into(self, backend: ReportBackend) -> None:
-        if self.type == ItemType.IMAGE:
-            backend.add_image(
-                self.content,
-                title=self.meta.get("title"),
-                caption=self.meta.get("caption"),
-                width_mm=self.meta.get("width_mm"),
-            )
-        elif self.type == ItemType.HEADING:
-            backend.add_heading(self.content, level=self.meta.get("heading_level", 2))
-        elif self.type == ItemType.PARAGRAPH:
-            backend.add_paragraph(self.content)
-        elif self.type == ItemType.CAPTION:
-            backend.add_caption(self.content)
-        elif self.type == ItemType.PAGE_BREAK:
-            backend.add_page_break()
-
-    def to_dict(self) -> dict[str, Any]:
-        return {
-            "id": self.id,
-            "type": self.type.value,
-            "content": self.content,
-            "meta": self.meta,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> ReportItem:
-        return cls(
-            id=data["id"],
-            type=ItemType(data["type"]),
-            content=data.get("content", ""),
-            meta=data.get("meta", {}),
-        )
-
-
-# ---------------------------------------------------------------------------
 # Type registry for deserialization
 # ---------------------------------------------------------------------------
 
@@ -226,14 +165,9 @@ _BUILTIN: dict[str, type] = {
 def element_from_dict(data: dict[str, Any]) -> ReportElement:
     """Reconstruct an element from its serialized form.
 
-    The ``type`` field is the discriminator.  Records that carry a
-    ``content`` key (the legacy schema) are deserialized as
-    :class:`ReportItem` for backwards compatibility.
+    The ``type`` field is the discriminator.
     """
     type_name = data.get("type")
-    # Legacy schema: {type: "image", content: "...", meta: {...}}
-    if "content" in data and "data_uri" not in data and "text" not in data:
-        return ReportItem.from_dict(data)
     if type_name not in _BUILTIN:
         raise ValueError(f"Unknown element type: {type_name!r}")
     return _BUILTIN[type_name].from_dict(data)

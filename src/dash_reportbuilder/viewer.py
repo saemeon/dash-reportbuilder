@@ -84,7 +84,12 @@ def report_viewer(
     report = store.get(session_id)
 
     format_options = []
-    fmt_labels = {"docx": "Word (.docx)", "pptx": "PowerPoint (.pptx)", "typst": "Typst (.typ)", "pdf": "PDF"}
+    fmt_labels = {
+        "docx": "Word (.docx)",
+        "pptx": "PowerPoint (.pptx)",
+        "typst": "Typst (.typ)",
+        "pdf": "PDF",
+    }
     for fmt in export_formats:
         format_options.append({"label": fmt_labels.get(fmt, fmt), "value": fmt})
 
@@ -99,11 +104,18 @@ def report_viewer(
             html.Div(
                 style={"display": "flex", "alignItems": "center", "gap": "8px"},
                 children=[
-                    html.Label("Report:", style={"fontWeight": "bold", "fontSize": "14px"}),
+                    html.Label(
+                        "Report:", style={"fontWeight": "bold", "fontSize": "14px"}
+                    ),
                     dcc.Input(
                         id=title_input_id,
                         value=report.title,
-                        style={"flex": "1", "border": "1px solid #ddd", "borderRadius": "3px", "padding": "4px 8px"},
+                        style={
+                            "flex": "1",
+                            "border": "1px solid #ddd",
+                            "borderRadius": "3px",
+                            "padding": "4px 8px",
+                        },
                         debounce=True,
                     ),
                 ],
@@ -143,7 +155,11 @@ def report_viewer(
                         clearable=False,
                         style={"width": "180px", "fontSize": "13px"},
                     ),
-                    html.Button("Export", id=export_btn_id, style={**_BTN_STYLE, "fontWeight": "bold"}),
+                    html.Button(
+                        "Export",
+                        id=export_btn_id,
+                        style={**_BTN_STYLE, "fontWeight": "bold"},
+                    ),
                     dcc.Download(id=export_download_id),
                 ],
             ),

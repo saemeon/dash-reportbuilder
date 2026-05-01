@@ -15,10 +15,8 @@ from dash_reportbuilder.elements import (
     CaptionElement,
     HeadingElement,
     ImageElement,
-    ItemType,
     PageBreakElement,
     ParagraphElement,
-    ReportItem,
     element_from_dict,
     register_element_type,
 )
@@ -42,9 +40,6 @@ __all__ = [
     "PageBreakElement",
     "element_from_dict",
     "register_element_type",
-    # legacy element shim
-    "ReportItem",
-    "ItemType",
     # store
     "ReportStore",
     "MemoryStore",

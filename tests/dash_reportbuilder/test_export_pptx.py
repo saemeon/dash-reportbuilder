@@ -5,7 +5,14 @@ import io
 
 import pytest
 
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    ImageElement,
+    PageBreakElement,
+    ParagraphElement,
+)
+from dash_reportbuilder.model import Report
 
 _TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
 
@@ -13,11 +20,11 @@ _TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd
 @pytest.fixture
 def slides_report():
     report = Report(title="Slides")
-    report.append(ReportItem(type=ItemType.HEADING, content="Title Slide"))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.CAPTION, content="Chart 1"))
-    report.append(ReportItem(type=ItemType.PAGE_BREAK))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
+    report.append(HeadingElement(text="Title Slide", level=2))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(CaptionElement(text="Chart 1"))
+    report.append(PageBreakElement())
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
     return report
 
 
@@ -52,12 +59,11 @@ def test_heading_creates_new_slide():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Heading Test")
-    report.append(ReportItem(type=ItemType.HEADING, content="My Title"))
+    report.append(HeadingElement(text="My Title", level=2))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
     assert len(prs.slides) == 1
-    # The slide should contain a textbox with the heading text
     texts = []
     for shape in prs.slides[0].shapes:
         if shape.has_text_frame:
@@ -70,9 +76,9 @@ def test_multiple_images_create_multiple_slides():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Multi Image")
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
@@ -84,14 +90,13 @@ def test_page_break_resets_slide():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Break Test")
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.CAPTION, content="Caption on image slide"))
-    report.append(ReportItem(type=ItemType.PAGE_BREAK))
-    report.append(ReportItem(type=ItemType.PARAGRAPH, content="After break"))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(CaptionElement(text="Caption on image slide"))
+    report.append(PageBreakElement())
+    report.append(ParagraphElement(text="After break"))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
-    # Slide 1: image + caption, slide 2: paragraph (because page_break reset)
     assert len(prs.slides) == 2
 
 
@@ -100,12 +105,11 @@ def test_caption_on_current_slide():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Caption Test")
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.CAPTION, content="My Caption"))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(CaptionElement(text="My Caption"))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
-    # Only 1 slide: image + caption on the same slide
     assert len(prs.slides) == 1
     texts = []
     for shape in prs.slides[0].shapes:
@@ -119,7 +123,7 @@ def test_paragraph_without_prior_slide_creates_one():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Orphan Paragraph")
-    report.append(ReportItem(type=ItemType.PARAGRAPH, content="Standalone text"))
+    report.append(ParagraphElement(text="Standalone text"))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
@@ -131,8 +135,8 @@ def test_heading_then_image_creates_two_slides():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="H+I")
-    report.append(ReportItem(type=ItemType.HEADING, content="Heading"))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
+    report.append(HeadingElement(text="Heading", level=2))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
@@ -144,12 +148,11 @@ def test_caption_italic():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report()
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.CAPTION, content="Italic caption"))
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
+    report.append(CaptionElement(text="Italic caption"))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
-    # Find the caption text box
     for shape in prs.slides[0].shapes:
         if shape.has_text_frame and shape.text_frame.text == "Italic caption":
             assert shape.text_frame.paragraphs[0].font.italic is True
@@ -172,11 +175,10 @@ def test_multiple_page_breaks():
     from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report()
-    report.append(ReportItem(type=ItemType.PAGE_BREAK))
-    report.append(ReportItem(type=ItemType.PAGE_BREAK))
-    report.append(ReportItem(type=ItemType.IMAGE, content=_TINY_PNG_URI))
+    report.append(PageBreakElement())
+    report.append(PageBreakElement())
+    report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
     result = export_pptx(report)
     prs = _load_pptx(result)
-    # Only the image creates a slide; page breaks alone create no slides
     assert len(prs.slides) == 1

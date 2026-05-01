@@ -38,10 +38,19 @@ fig2 = go.Figure(
 # --- Layout ---
 
 app.layout = html.Div(
-    style={"maxWidth": "900px", "margin": "0 auto", "padding": "24px", "fontFamily": "sans-serif"},
+    style={
+        "maxWidth": "900px",
+        "margin": "0 auto",
+        "padding": "24px",
+        "fontFamily": "sans-serif",
+    },
     children=[
         html.Div(
-            style={"display": "flex", "justifyContent": "space-between", "alignItems": "center"},
+            style={
+                "display": "flex",
+                "justifyContent": "space-between",
+                "alignItems": "center",
+            },
             children=[
                 html.H2("Dashboard"),
                 report_viewer(store),

@@ -5,7 +5,14 @@
 
 import pytest
 
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    ImageElement,
+    PageBreakElement,
+    ParagraphElement,
+)
+from dash_reportbuilder.model import Report
 
 # Valid 1x1 red PNG, base64-encoded
 TINY_PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
@@ -20,9 +27,9 @@ def tiny_png_uri():
 @pytest.fixture
 def sample_report():
     report = Report(title="Test Report")
-    report.append(ReportItem(type=ItemType.HEADING, content="Introduction"))
-    report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
-    report.append(ReportItem(type=ItemType.PARAGRAPH, content="Some text here."))
-    report.append(ReportItem(type=ItemType.CAPTION, content="Figure 1"))
-    report.append(ReportItem(type=ItemType.PAGE_BREAK))
+    report.append(HeadingElement(text="Introduction", level=2))
+    report.append(ImageElement(data_uri=TINY_PNG_URI))
+    report.append(ParagraphElement(text="Some text here."))
+    report.append(CaptionElement(text="Figure 1"))
+    report.append(PageBreakElement())
     return report

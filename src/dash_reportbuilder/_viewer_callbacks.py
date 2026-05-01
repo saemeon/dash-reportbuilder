@@ -117,9 +117,7 @@ def register_viewer_callbacks(
         for prop_info, val in zip(prop_ids, values):
             if prop_info["id"]["index"] == item_id:
                 report = store.get(session_id)
-                # Legacy ReportItem stores text in `content`; new typed
-                # elements store it in `text`.  Try both so both work.
-                report.update_item(item_id, content=val or "", text=val or "")
+                report.update_item(item_id, text=val or "")
                 store.put(session_id, report)
                 return dash.no_update
         return dash.no_update
@@ -198,7 +196,9 @@ def register_viewer_callbacks(
         if not order_data:
             return dash.no_update
         # order_data is {order: [...ids], ts: timestamp}
-        dom_order = order_data.get("order") if isinstance(order_data, dict) else order_data
+        dom_order = (
+            order_data.get("order") if isinstance(order_data, dict) else order_data
+        )
         if not dom_order:
             return dash.no_update
         report = store.get(session_id)

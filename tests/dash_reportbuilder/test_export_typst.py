@@ -1,8 +1,15 @@
 # Copyright (c) Simon Niederberger.
 # Distributed under the terms of the MIT License.
 
+from dash_reportbuilder.elements import (
+    CaptionElement,
+    HeadingElement,
+    ImageElement,
+    PageBreakElement,
+    ParagraphElement,
+)
 from dash_reportbuilder.export._base import TypstTemplate
-from dash_reportbuilder.model import ItemType, Report, ReportItem
+from dash_reportbuilder.model import Report
 
 
 def test_export_typst_produces_string(sample_report):
@@ -22,7 +29,7 @@ def test_export_typst_escapes_special_chars():
     from dash_reportbuilder.export._typst import export_typst
 
     report = Report(title="Report #1")
-    report.append(ReportItem(type=ItemType.PARAGRAPH, content="Price: $100 @user"))
+    report.append(ParagraphElement(text="Price: $100 @user"))
     result = export_typst(report)
     assert "\\#1" in result
     assert "\\$100" in result
@@ -59,20 +66,15 @@ class TestHeadingLevels:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(
-            ReportItem(type=ItemType.HEADING, content="Top", meta={"heading_level": 1})
-        )
+        report.append(HeadingElement(text="Top", level=1))
         result = export_typst(report)
-        # Level 1 heading: single "=" (but title is also "= T", so check for "= Top")
         assert "\n= Top\n" in result
 
     def test_heading_level_2(self):
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(
-            ReportItem(type=ItemType.HEADING, content="Sub", meta={"heading_level": 2})
-        )
+        report.append(HeadingElement(text="Sub", level=2))
         result = export_typst(report)
         assert "== Sub" in result
 
@@ -80,9 +82,7 @@ class TestHeadingLevels:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(
-            ReportItem(type=ItemType.HEADING, content="SubSub", meta={"heading_level": 3})
-        )
+        report.append(HeadingElement(text="SubSub", level=3))
         result = export_typst(report)
         assert "=== SubSub" in result
 
@@ -90,39 +90,31 @@ class TestHeadingLevels:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.HEADING, content="Default"))
+        report.append(HeadingElement(text="Default", level=2))
         result = export_typst(report)
         assert "== Default" in result
         assert "=== Default" not in result
 
 
 class TestImageCaptionMeta:
-    """Image with caption in meta emits #emph[...]."""
+    """Image with caption emits #emph[...]."""
 
     def test_image_with_caption(self):
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(
-            ReportItem(
-                type=ItemType.IMAGE,
-                content=TINY_PNG_URI,
-                meta={"caption": "Figure 1"},
-            )
-        )
+        report.append(ImageElement(data_uri=TINY_PNG_URI, caption="Figure 1"))
         result = export_typst(report)
         assert 'image("img_1.png"' in result
-        # Caption inside a #figure() block
         assert "Figure 1" in result
 
     def test_image_without_caption(self):
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
         result = export_typst(report)
         assert 'image("img_1.png"' in result
-        # No emph line right after the image
         lines = result.split("\n")
         for i, line in enumerate(lines):
             if "img_1.png" in line:
@@ -139,22 +131,22 @@ class TestImageSequentialFilenames:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
         result = export_typst(report)
         assert 'image("img_1.png"' in result
         assert 'image("img_2.png"' in result
         assert 'image("img_3.png"' in result
 
     def test_images_interleaved_with_text(self):
-        """Image counter only increments for IMAGE items."""
+        """Image counter only increments for image items."""
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
-        report.append(ReportItem(type=ItemType.PARAGRAPH, content="text"))
-        report.append(ReportItem(type=ItemType.IMAGE, content=TINY_PNG_URI))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
+        report.append(ParagraphElement(text="text"))
+        report.append(ImageElement(data_uri=TINY_PNG_URI))
         result = export_typst(report)
         assert 'image("img_1.png"' in result
         assert 'image("img_2.png"' in result
@@ -237,7 +229,7 @@ class TestCaptionItem:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.CAPTION, content="Source: dataset"))
+        report.append(CaptionElement(text="Source: dataset"))
         result = export_typst(report)
         assert "emph[Source: dataset]" in result
 
@@ -249,9 +241,9 @@ class TestPageBreak:
         from dash_reportbuilder.export._typst import export_typst
 
         report = Report(title="T")
-        report.append(ReportItem(type=ItemType.PARAGRAPH, content="Before"))
-        report.append(ReportItem(type=ItemType.PAGE_BREAK))
-        report.append(ReportItem(type=ItemType.PARAGRAPH, content="After"))
+        report.append(ParagraphElement(text="Before"))
+        report.append(PageBreakElement())
+        report.append(ParagraphElement(text="After"))
         result = export_typst(report)
         lines = result.split("\n")
         pb_indices = [i for i, ln in enumerate(lines) if ln.strip() == "#pagebreak()"]

@@ -8,14 +8,10 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
-from dash_reportbuilder.elements import (
-    ItemType,  # re-exported for backwards compatibility
-    ReportItem,  # re-exported for backwards compatibility
-    element_from_dict,
-)
+from dash_reportbuilder.elements import element_from_dict
 from dash_reportbuilder.protocols import ReportBackend, ReportElement
 
-__all__ = ["Report", "ReportItem", "ItemType"]
+__all__ = ["Report"]
 
 
 @dataclass
@@ -50,9 +46,7 @@ class Report:
 
     def remove(self, item_id: str) -> None:
         """Remove an element by its ``id`` field."""
-        self.items = [
-            it for it in self.items if getattr(it, "id", None) != item_id
-        ]
+        self.items = [it for it in self.items if getattr(it, "id", None) != item_id]
 
     def reorder(self, item_ids: list[str]) -> None:
         """Reorder elements to match *item_ids*; unknown IDs are ignored."""
