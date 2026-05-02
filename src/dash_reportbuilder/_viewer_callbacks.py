@@ -11,7 +11,12 @@ import dash
 from dash import ALL, Input, Output, State, dcc
 
 from dash_reportbuilder._viewer_layout import render_item_list
-from dash_reportbuilder.backends import DocxBackend, PptxBackend, TypstBackend
+from dash_reportbuilder.backends import (
+    DocxBackend,
+    HtmlBackend,
+    PptxBackend,
+    TypstBackend,
+)
 from dash_reportbuilder.capture import _bump_version, get_version
 from dash_reportbuilder.elements import (
     CaptionElement,
@@ -228,4 +233,9 @@ def register_viewer_callbacks(
             backend = TypstBackend(template=template, title=report.title)
             data = report.export(backend)
             return dcc.send_bytes(data, f"{report.title}.pdf")
+        elif fmt == "html":
+            backend = HtmlBackend(template=template, title=report.title)
+            for item in report.items:
+                item.render_into(backend)
+            return dcc.send_string(backend.build_source(), f"{report.title}.html")
         return dash.no_update

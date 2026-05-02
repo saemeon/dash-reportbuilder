@@ -67,6 +67,7 @@ dash_reportbuilder = [
     "templates/example.typ",
     "templates/example.docx",
     "templates/example.pptx",
+    "templates/example.html",
 ]
 
 [tool.pytest.ini_options]

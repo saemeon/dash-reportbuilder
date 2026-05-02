@@ -58,6 +58,36 @@ class PptxTemplate:
 
 
 @dataclass
+class HtmlTemplate:
+    """Template settings for HTML export.
+
+    Parameters
+    ----------
+    template : str, optional
+        HTML head/style block.  Can be:
+        - A path to an .html file (read from disk if it exists; the
+          contents are inserted verbatim into ``<head>``)
+        - A raw HTML/CSS string (inserted verbatim into ``<head>``)
+        When omitted, a sensible default ``<style>`` block is generated
+        from the *font*, *font_size*, and *primary_color* fields.
+    font : str
+        Body font family (CSS).
+    font_size : str
+        Body font size (CSS, e.g. ``"11pt"``).
+    primary_color : str
+        Heading / accent color (CSS color).
+    page_max_width : str
+        Maximum content width (CSS, e.g. ``"800px"``).
+    """
+
+    template: str | None = None
+    font: str = "Calibri, Helvetica, Arial, sans-serif"
+    font_size: str = "11pt"
+    primary_color: str = "#2563eb"
+    page_max_width: str = "800px"
+
+
+@dataclass
 class TypstTemplate:
     """Template settings for Typst/PDF export.
 

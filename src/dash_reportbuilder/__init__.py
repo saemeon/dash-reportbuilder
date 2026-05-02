@@ -20,8 +20,18 @@ from dash_reportbuilder.elements import (
     element_from_dict,
     register_element_type,
 )
-from dash_reportbuilder.backends import DocxBackend, PptxBackend, TypstBackend
-from dash_reportbuilder.export._base import DocxTemplate, PptxTemplate, TypstTemplate
+from dash_reportbuilder.backends import (
+    DocxBackend,
+    HtmlBackend,
+    PptxBackend,
+    TypstBackend,
+)
+from dash_reportbuilder.export._base import (
+    DocxTemplate,
+    HtmlTemplate,
+    PptxTemplate,
+    TypstTemplate,
+)
 from dash_reportbuilder.model import Report
 from dash_reportbuilder.protocols import ReportBackend, ReportElement
 from dash_reportbuilder.store import FileStore, MemoryStore, ReportStore
@@ -54,9 +64,11 @@ __all__ = [
     "DocxBackend",
     "PptxBackend",
     "TypstBackend",
+    "HtmlBackend",
     # templates
     "DocxTemplate",
     "PptxTemplate",
     "TypstTemplate",
+    "HtmlTemplate",
     "example_template_path",
 ]

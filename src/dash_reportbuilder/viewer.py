@@ -89,6 +89,7 @@ def report_viewer(
         "pptx": "PowerPoint (.pptx)",
         "typst": "Typst (.typ)",
         "pdf": "PDF",
+        "html": "HTML (.html)",
     }
     for fmt in export_formats:
         format_options.append({"label": fmt_labels.get(fmt, fmt), "value": fmt})

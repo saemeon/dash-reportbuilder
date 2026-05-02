@@ -28,10 +28,11 @@ _FORMATS: dict[str, str] = {
     "docx": "example.docx",
     "pptx": "example.pptx",
     "typst": "example.typ",
+    "html": "example.html",
 }
 
 
-def example_template_path(format: Literal["docx", "pptx", "typst"]) -> Path:
+def example_template_path(format: Literal["docx", "pptx", "typst", "html"]) -> Path:
     """Return the path to the bundled example template for *format*.
 
     Parameters
