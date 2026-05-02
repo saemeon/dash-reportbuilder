@@ -54,6 +54,11 @@ In [`src/dash_reportbuilder/backends/`](src/dash_reportbuilder/backends/):
   with images embedded as data-URIs;
   escape hatch: `append_raw_html(source: str)`. Also has
   `build_source() -> str` for the document as text.
+- `ImageZipBackend()` — collects every image in the report into a `.zip`;
+  non-image primitives (headings, paragraphs, etc.) are silent no-ops.
+  Filenames default to `image_001.png`, `image_002.png`, …; the `title`
+  argument on `add_image()` overrides (sanitized).
+  Escape hatch: `add_raw(filename, data)` for arbitrary zip entries.
 
 ### Native rendering pattern
 
@@ -101,6 +106,7 @@ src/dash_reportbuilder/
 ├── backends/
 │   ├── _docx.py             # DocxBackend
 │   ├── _html.py             # HtmlBackend
+│   ├── _image_zip.py        # ImageZipBackend
 │   ├── _pptx.py             # PptxBackend
 │   └── _typst.py            # TypstBackend
 ├── export/
@@ -127,7 +133,8 @@ From `dash_reportbuilder`:
 - Core: `Report`, `ReportElement`, `ReportBackend`
 - Elements: `HeadingElement`, `ParagraphElement`, `ImageElement`,
   `CaptionElement`, `PageBreakElement`, `register_element_type`
-- Backends: `DocxBackend`, `PptxBackend`, `TypstBackend`, `HtmlBackend`
+- Backends: `DocxBackend`, `PptxBackend`, `TypstBackend`, `HtmlBackend`,
+  `ImageZipBackend`
 - Templates: `DocxTemplate`, `PptxTemplate`, `TypstTemplate`, `HtmlTemplate`
 - Bundled assets: `example_template_path("docx" | "pptx" | "typst" | "html")`
 - Store: `ReportStore`, `MemoryStore`, `FileStore`
@@ -214,8 +221,6 @@ These compose cleanly with the current design — no architectural rewrite neede
   that have underlying data; new `ExcelBackend` queries elements implementing
   it. Rejected for v1 because dash-capture sources are screenshots (no
   underlying data).
-- **Asset mode** — `ChartSource` Protocol + `SvgZipBackend` / `PngZipBackend`
-  for image-only export.
 - **Template scaffolds** — let document backends accept a "scaffold" template
   (header + element-loop + footer) for narrative reports with fixed prose
   around dynamic elements. Equivalent of knitr/Rmd / `.r.typ`.
