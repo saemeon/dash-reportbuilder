@@ -90,6 +90,7 @@ def report_viewer(
         "typst": "Typst (.typ)",
         "pdf": "PDF",
         "html": "HTML (.html)",
+        "images": "Images (.zip)",
     }
     for fmt in export_formats:
         format_options.append({"label": fmt_labels.get(fmt, fmt), "value": fmt})

@@ -14,6 +14,7 @@ from dash_reportbuilder._viewer_layout import render_item_list
 from dash_reportbuilder.backends import (
     DocxBackend,
     HtmlBackend,
+    ImageZipBackend,
     PptxBackend,
     TypstBackend,
 )
@@ -238,4 +239,8 @@ def register_viewer_callbacks(
             for item in report.items:
                 item.render_into(backend)
             return dcc.send_string(backend.build_source(), f"{report.title}.html")
+        elif fmt == "images":
+            backend = ImageZipBackend()
+            data = report.export(backend)
+            return dcc.send_bytes(data, f"{report.title}.zip")
         return dash.no_update

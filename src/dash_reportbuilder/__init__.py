@@ -23,6 +23,7 @@ from dash_reportbuilder.elements import (
 from dash_reportbuilder.backends import (
     DocxBackend,
     HtmlBackend,
+    ImageZipBackend,
     PptxBackend,
     TypstBackend,
 )
@@ -65,6 +66,7 @@ __all__ = [
     "PptxBackend",
     "TypstBackend",
     "HtmlBackend",
+    "ImageZipBackend",
     # templates
     "DocxTemplate",
     "PptxTemplate",

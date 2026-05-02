@@ -5,7 +5,14 @@
 
 from dash_reportbuilder.backends._docx import DocxBackend
 from dash_reportbuilder.backends._html import HtmlBackend
+from dash_reportbuilder.backends._image_zip import ImageZipBackend
 from dash_reportbuilder.backends._pptx import PptxBackend
 from dash_reportbuilder.backends._typst import TypstBackend
 
-__all__ = ["DocxBackend", "HtmlBackend", "PptxBackend", "TypstBackend"]
+__all__ = [
+    "DocxBackend",
+    "HtmlBackend",
+    "ImageZipBackend",
+    "PptxBackend",
+    "TypstBackend",
+]
