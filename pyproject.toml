@@ -73,6 +73,10 @@ dash_reportbuilder = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--cov=src --cov-report=term-missing"
+filterwarnings = [
+    # Selenium uses urllib3's deprecated HTTPResponse.getheader(); not ours to fix.
+    "ignore:HTTPResponse.getheader\\(\\) is deprecated:DeprecationWarning:selenium.*",
+]
 
 [tool.ty.src]
 include = ["src"]
