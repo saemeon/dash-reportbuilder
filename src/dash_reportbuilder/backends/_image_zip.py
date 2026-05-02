@@ -77,10 +77,7 @@ class ImageZipBackend:
         # meaningful in document-style backends.
         self._counter += 1
         ext = _ext_from_data_uri(data_uri)
-        if title:
-            base = _sanitize(title)
-        else:
-            base = f"image_{self._counter:03d}"
+        base = _sanitize(title) if title else f"image_{self._counter:03d}"
 
         # Disambiguate collisions: foo, foo_2, foo_3, …
         name = f"{base}.{ext}"

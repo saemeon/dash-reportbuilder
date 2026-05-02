@@ -10,6 +10,13 @@ try:
 except PackageNotFoundError:
     __version__ = "unknown"
 
+from dash_reportbuilder.backends import (
+    DocxBackend,
+    HtmlBackend,
+    ImageZipBackend,
+    PptxBackend,
+    TypstBackend,
+)
 from dash_reportbuilder.capture import get_version, report_action
 from dash_reportbuilder.elements import (
     CaptionElement,
@@ -19,13 +26,6 @@ from dash_reportbuilder.elements import (
     ParagraphElement,
     element_from_dict,
     register_element_type,
-)
-from dash_reportbuilder.backends import (
-    DocxBackend,
-    HtmlBackend,
-    ImageZipBackend,
-    PptxBackend,
-    TypstBackend,
 )
 from dash_reportbuilder.export._base import (
     DocxTemplate,

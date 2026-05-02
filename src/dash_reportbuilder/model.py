@@ -31,7 +31,7 @@ class Report:
     """
 
     title: str = "Untitled Report"
-    items: list[ReportElement] = field(default_factory=list)
+    items: list[Any] = field(default_factory=list)
 
     # ------------------------------------------------------------------
     # Mutation
@@ -57,9 +57,7 @@ class Report:
             if iid in by_id and iid not in seen:
                 reordered.append(by_id[iid])
                 seen.add(iid)
-        for it in self.items:
-            if getattr(it, "id", None) not in seen:
-                reordered.append(it)
+        reordered.extend(it for it in self.items if getattr(it, "id", None) not in seen)
         self.items = reordered
 
     def update_item(self, item_id: str, **fields: Any) -> None:
@@ -87,7 +85,7 @@ class Report:
     def to_dict(self) -> dict[str, Any]:
         return {
             "title": self.title,
-            "items": [it.to_dict() for it in self.items],  # type: ignore[attr-defined]
+            "items": [it.to_dict() for it in self.items],
         }
 
     @classmethod

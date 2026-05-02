@@ -5,6 +5,7 @@ import io
 
 import pytest
 
+from dash_reportbuilder.backends import PptxBackend
 from dash_reportbuilder.elements import (
     CaptionElement,
     HeadingElement,
@@ -35,19 +36,17 @@ def _load_pptx(data: bytes):
 
 
 def test_export_pptx_produces_bytes(slides_report):
-    from dash_reportbuilder.export._pptx import export_pptx
 
-    result = export_pptx(slides_report)
+    result = slides_report.export(PptxBackend())
     assert isinstance(result, bytes)
     assert len(result) > 100
     assert result[:2] == b"PK"
 
 
 def test_export_pptx_empty_report():
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report()
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     assert isinstance(result, bytes)
 
 
@@ -56,38 +55,34 @@ def test_export_pptx_empty_report():
 
 def test_heading_creates_new_slide():
     """A heading item creates its own slide with a text box."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Heading Test")
     report.append(HeadingElement(text="My Title", level=2))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 1
-    texts = []
-    for shape in prs.slides[0].shapes:
-        if shape.has_text_frame:
-            texts.append(shape.text_frame.text)
+    texts = [
+        shape.text_frame.text for shape in prs.slides[0].shapes if shape.has_text_frame
+    ]
     assert "My Title" in texts
 
 
 def test_multiple_images_create_multiple_slides():
     """Each image gets its own slide."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Multi Image")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 3
 
 
 def test_page_break_resets_slide():
     """Page break sets current_slide to None, so next text item starts a new slide."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Break Test")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
@@ -95,63 +90,58 @@ def test_page_break_resets_slide():
     report.append(PageBreakElement())
     report.append(ParagraphElement(text="After break"))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 2
 
 
 def test_caption_on_current_slide():
     """Caption/paragraph text goes on the current slide, not a new one."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Caption Test")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(CaptionElement(text="My Caption"))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 1
-    texts = []
-    for shape in prs.slides[0].shapes:
-        if shape.has_text_frame:
-            texts.append(shape.text_frame.text)
+    texts = [
+        shape.text_frame.text for shape in prs.slides[0].shapes if shape.has_text_frame
+    ]
     assert "My Caption" in texts
 
 
 def test_paragraph_without_prior_slide_creates_one():
     """A paragraph with no prior slide creates a new slide."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="Orphan Paragraph")
     report.append(ParagraphElement(text="Standalone text"))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 1
 
 
 def test_heading_then_image_creates_two_slides():
     """Heading and image each get their own slide."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report(title="H+I")
     report.append(HeadingElement(text="Heading", level=2))
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 2
 
 
 def test_caption_italic():
     """Caption text is italic."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report()
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(CaptionElement(text="Italic caption"))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     for shape in prs.slides[0].shapes:
         if shape.has_text_frame and shape.text_frame.text == "Italic caption":
@@ -163,22 +153,20 @@ def test_caption_italic():
 
 def test_slides_report_slide_count(slides_report):
     """slides_report: heading(1 slide) + image(1 slide) + caption(on image slide) + page_break + image(1 slide) = 3 slides."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
-    result = export_pptx(slides_report)
+    result = slides_report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 3
 
 
 def test_multiple_page_breaks():
     """Multiple consecutive page breaks should not crash."""
-    from dash_reportbuilder.export._pptx import export_pptx
 
     report = Report()
     report.append(PageBreakElement())
     report.append(PageBreakElement())
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
 
-    result = export_pptx(report)
+    result = report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 1

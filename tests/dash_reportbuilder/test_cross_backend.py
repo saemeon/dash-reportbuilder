@@ -13,7 +13,7 @@ from __future__ import annotations
 import io
 import tempfile
 import zipfile
-from typing import Callable
+from collections.abc import Callable
 
 import pytest
 
@@ -139,11 +139,12 @@ class TestTextContentReachesEachBackend:
         report = _build_report()
         data = _FACTORIES["pptx"](report)
         prs = Presentation(io.BytesIO(data))
-        texts = []
-        for slide in prs.slides:
-            for shape in slide.shapes:
-                if shape.has_text_frame:
-                    texts.append(shape.text_frame.text)
+        texts = [
+            shape.text_frame.text
+            for slide in prs.slides
+            for shape in slide.shapes
+            if shape.has_text_frame
+        ]
         flat = "\n".join(texts)
         assert "Section One" in flat
         assert "Some prose body." in flat
@@ -172,9 +173,7 @@ class TestImageReachesEachBackend:
 
         data = _FACTORIES["pptx"](_build_report())
         prs = Presentation(io.BytesIO(data))
-        n_pics = sum(
-            1 for s in prs.slides for sh in s.shapes if sh.shape_type == 13
-        )
+        n_pics = sum(1 for s in prs.slides for sh in s.shapes if sh.shape_type == 13)
         assert n_pics >= 1
 
     def test_image_zip_contains_titled_file(self):

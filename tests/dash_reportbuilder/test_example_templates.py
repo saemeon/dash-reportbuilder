@@ -3,6 +3,8 @@
 
 """Tests for the bundled example template assets."""
 
+from typing import Any, cast
+
 import pytest
 
 from dash_reportbuilder import (
@@ -30,7 +32,7 @@ class TestExampleTemplatePath:
 
     def test_unknown_format_raises(self):
         with pytest.raises(ValueError, match="Unknown template format"):
-            example_template_path("xlsx")  # type: ignore[arg-type]
+            example_template_path(cast(Any, "xlsx"))
 
     def test_typst_template_is_text(self):
         path = example_template_path("typst")

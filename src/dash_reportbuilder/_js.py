@@ -6,7 +6,7 @@
 from __future__ import annotations
 
 import shutil
-from importlib.resources import files
+from importlib.resources import as_file, files
 from pathlib import Path
 
 import dash
@@ -25,6 +25,7 @@ def ensure_assets() -> None:
     for name in ("Sortable.min.js", "reportbuilder.js"):
         src = pkg_assets / name
         dst = app_assets / name
-        # Copy if missing or if package version is newer
-        if not dst.exists() or dst.stat().st_size != src.stat().st_size:
-            shutil.copy2(str(src), str(dst))
+        with as_file(src) as src_path:
+            # Copy if missing or if package version is newer
+            if not dst.exists() or dst.read_bytes() != src_path.read_bytes():
+                shutil.copy2(src_path, dst)

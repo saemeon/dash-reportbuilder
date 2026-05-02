@@ -7,15 +7,15 @@ from __future__ import annotations
 
 from typing import Any
 
-from dash_capture import WizardAction
-
-from dash_reportbuilder.elements import ImageElement
-from dash_reportbuilder.store import ReportStore
-
 # Global version counters per store — bumped on every mutation so the
 # viewer knows to refresh.  WeakKeyDictionary avoids id() collisions when
 # a store is garbage-collected and the next allocation reuses its id.
 from weakref import WeakKeyDictionary
+
+from dash_capture import WizardAction
+
+from dash_reportbuilder.elements import ImageElement
+from dash_reportbuilder.store import ReportStore
 
 _version_counters: WeakKeyDictionary[ReportStore, int] = WeakKeyDictionary()
 

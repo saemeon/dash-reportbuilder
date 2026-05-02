@@ -8,7 +8,7 @@ from __future__ import annotations
 from typing import Any
 
 import dash
-from dash import Input, Output, State, dcc, html
+from dash import Input, Output, dcc, html
 from dash_capture._wizard import build_wizard
 
 from dash_reportbuilder._ids import _new_id
@@ -83,7 +83,6 @@ def report_viewer(
 
     report = store.get(session_id)
 
-    format_options = []
     fmt_labels = {
         "docx": "Word (.docx)",
         "pptx": "PowerPoint (.pptx)",
@@ -92,8 +91,9 @@ def report_viewer(
         "html": "HTML (.html)",
         "images": "Images (.zip)",
     }
-    for fmt in export_formats:
-        format_options.append({"label": fmt_labels.get(fmt, fmt), "value": fmt})
+    format_options = [
+        {"label": fmt_labels.get(fmt, fmt), "value": fmt} for fmt in export_formats
+    ]
 
     body = html.Div(
         style={

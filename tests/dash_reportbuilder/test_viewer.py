@@ -3,6 +3,8 @@
 
 """Tests for viewer layout rendering (no callbacks / no running Dash app)."""
 
+from typing import Any, cast
+
 from dash import dcc, html
 
 from dash_reportbuilder._viewer_layout import render_item, render_item_list
@@ -52,7 +54,7 @@ class TestRenderItemImage:
 
     def test_image_div_id(self):
         item = ImageElement(data_uri=TINY_PNG_URI, id="img1")
-        div = render_item(item)
+        div = cast(Any, render_item(item))
         assert div.id == "drb-item-img1"
 
 

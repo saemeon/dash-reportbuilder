@@ -11,23 +11,20 @@ from __future__ import annotations
 
 import time
 
-import pytest
-
 import dash
 import plotly.graph_objects as go
 from dash import dcc, html
+from dash_capture import capture_graph, plotly_strategy
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from dash_capture import capture_graph, plotly_strategy
 from dash_reportbuilder import MemoryStore, report_action, report_viewer
 
 
 def _make_figure():
     return go.Figure(
         data=go.Scatter(x=[1, 2, 3], y=[4, 5, 6], mode="markers"),
-        layout=dict(title="Test Chart", width=400, height=300),
+        layout={"title": "Test Chart", "width": 400, "height": 300},
     )
 
 
@@ -199,10 +196,15 @@ def test_reorder_persists_to_export():
     separately by manual testing since dash_clientside.set_props
     cannot be reliably triggered from Selenium.
     """
-    from dash_reportbuilder import HeadingElement, MemoryStore
-    from dash_reportbuilder.export._docx import export_docx
-    from docx import Document
     import io
+
+    from docx import Document
+
+    from dash_reportbuilder import (
+        DocxBackend,
+        HeadingElement,
+        MemoryStore,
+    )
 
     store = MemoryStore()
     report = store.get("default")
@@ -216,9 +218,13 @@ def test_reorder_persists_to_export():
     store.put("default", report)
 
     # Export
-    data = export_docx(report)
+    data = report.export(DocxBackend(title=report.title))
     doc = Document(io.BytesIO(data))
-    headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
+    headings = [
+        p.text
+        for p in doc.paragraphs
+        if getattr(p.style, "name", "").startswith("Heading")
+    ]
     # First heading is the auto-title, then our items
     assert "Third" in headings
     assert "Second" in headings
@@ -281,5 +287,5 @@ def test_export_docx(dash_duo):
     # Just verify no JS errors
     time.sleep(2)
     logs = dash_duo.driver.get_log("browser")
-    errors = [l for l in logs if l["level"] == "SEVERE"]
+    errors = [log for log in logs if log["level"] == "SEVERE"]
     assert len(errors) == 0, f"Browser errors: {errors}"

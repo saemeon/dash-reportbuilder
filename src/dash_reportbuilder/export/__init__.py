@@ -3,10 +3,16 @@
 
 """Report export backends."""
 
-from dash_reportbuilder.export._base import DocxTemplate, PptxTemplate, TypstTemplate
+from dash_reportbuilder.export._base import (
+    DocxTemplate,
+    HtmlTemplate,
+    PptxTemplate,
+    TypstTemplate,
+)
 
 __all__ = [
     "DocxTemplate",
+    "HtmlTemplate",
     "PptxTemplate",
     "TypstTemplate",
 ]

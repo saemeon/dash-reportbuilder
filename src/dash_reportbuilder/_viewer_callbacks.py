@@ -120,7 +120,7 @@ def register_viewer_callbacks(
             return dash.no_update
         item_id = triggered["index"]
         prop_ids = dash.ctx.inputs_list[0]
-        for prop_info, val in zip(prop_ids, values):
+        for prop_info, val in zip(prop_ids, values, strict=False):
             if prop_info["id"]["index"] == item_id:
                 report = store.get(session_id)
                 report.update_item(item_id, text=val or "")

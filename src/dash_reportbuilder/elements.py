@@ -153,7 +153,7 @@ class PageBreakElement:
 # Type registry for deserialization
 # ---------------------------------------------------------------------------
 
-_BUILTIN: dict[str, type] = {
+_BUILTIN: dict[str, Any] = {
     HeadingElement.type: HeadingElement,
     ParagraphElement.type: ParagraphElement,
     ImageElement.type: ImageElement,

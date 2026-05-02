@@ -6,12 +6,13 @@
 from __future__ import annotations
 
 import io
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from dash_reportbuilder.export._base import DocxTemplate, decode_data_uri
 
 if TYPE_CHECKING:
-    from docx.document import Document  # type: ignore
+    from docx.document import Document
 
 
 class DocxBackend:
@@ -134,7 +135,7 @@ class DocxBackend:
     # Native escape hatch
     # ------------------------------------------------------------------
 
-    def modify(self, fn: Callable[["Document"], None]) -> None:
+    def modify(self, fn: Callable[[Document], None]) -> None:
         """Run *fn* against the underlying python-docx ``Document``.
 
         Lets elements use python-docx features that aren't exposed via

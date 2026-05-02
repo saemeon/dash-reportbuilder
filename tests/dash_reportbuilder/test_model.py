@@ -121,7 +121,7 @@ class TestReportFromDictEdgeCases:
 
         restored = Report.from_dict(report.to_dict())
         assert len(restored.items) == 5
-        for orig, rest in zip(report.items, restored.items):
+        for orig, rest in zip(report.items, restored.items, strict=True):
             assert type(orig) is type(rest)
 
 

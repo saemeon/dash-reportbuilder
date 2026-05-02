@@ -72,7 +72,7 @@ class CalloutElement:
         }
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "CalloutElement":
+    def from_dict(cls, data: dict[str, Any]) -> CalloutElement:
         return cls(
             id=data["id"],
             text=data["text"],

@@ -6,12 +6,13 @@
 from __future__ import annotations
 
 import io
-from typing import TYPE_CHECKING, Callable
+from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from dash_reportbuilder.export._base import PptxTemplate, decode_data_uri
 
 if TYPE_CHECKING:
-    from pptx.presentation import Presentation  # type: ignore
+    from pptx.presentation import Presentation
 
 
 class PptxBackend:
@@ -72,14 +73,18 @@ class PptxBackend:
         from pptx.util import Inches, Mm
 
         slide = self._new_slide()
+        slide_width = self.prs.slide_width
+        slide_height = self.prs.slide_height
+        assert slide_width is not None
+        assert slide_height is not None
 
         if title:
             from pptx.util import Pt
 
-            txBox = slide.shapes.add_textbox(
-                Inches(0.5), Inches(0.3), self.prs.slide_width - Inches(1), Inches(0.7)
+            text_box = slide.shapes.add_textbox(
+                Inches(0.5), Inches(0.3), slide_width - Inches(1), Inches(0.7)
             )
-            p = txBox.text_frame.paragraphs[0]
+            p = text_box.text_frame.paragraphs[0]
             p.text = title
             p.font.size = Pt(20)
             p.font.bold = True
@@ -90,8 +95,8 @@ class PptxBackend:
         img_bytes = decode_data_uri(data_uri)
         buf = io.BytesIO(img_bytes)
 
-        max_w = Mm(width_mm) if width_mm else self.prs.slide_width - Inches(1)
-        max_h = self.prs.slide_height - top - Inches(1.5)
+        max_w = Mm(width_mm) if width_mm else slide_width - Inches(1)
+        max_h = slide_height - top - Inches(1.5)
 
         pic = slide.shapes.add_picture(buf, Inches(0.5), top, width=max_w)
         if pic.height > max_h:
@@ -108,10 +113,12 @@ class PptxBackend:
         from pptx.util import Inches, Pt
 
         slide = self._new_slide()
-        txBox = slide.shapes.add_textbox(
-            Inches(0.5), Inches(0.5), self.prs.slide_width - Inches(1), Inches(1)
+        slide_width = self.prs.slide_width
+        assert slide_width is not None
+        text_box = slide.shapes.add_textbox(
+            Inches(0.5), Inches(0.5), slide_width - Inches(1), Inches(1)
         )
-        p = txBox.text_frame.paragraphs[0]
+        p = text_box.text_frame.paragraphs[0]
         p.text = text
         p.font.size = Pt(max(28 - (level - 1) * 4, 14))
         p.font.bold = True
@@ -120,13 +127,17 @@ class PptxBackend:
         from pptx.util import Inches, Pt
 
         slide = self._ensure_slide()
-        txBox = slide.shapes.add_textbox(
+        slide_height = self.prs.slide_height
+        slide_width = self.prs.slide_width
+        assert slide_height is not None
+        assert slide_width is not None
+        text_box = slide.shapes.add_textbox(
             Inches(0.5),
-            self.prs.slide_height - Inches(1.5),
-            self.prs.slide_width - Inches(1),
+            slide_height - Inches(1.5),
+            slide_width - Inches(1),
             Inches(1),
         )
-        p = txBox.text_frame.paragraphs[0]
+        p = text_box.text_frame.paragraphs[0]
         p.text = text
         p.font.size = Pt(12)
 
@@ -134,13 +145,17 @@ class PptxBackend:
         from pptx.util import Inches, Pt
 
         slide = self._ensure_slide()
-        txBox = slide.shapes.add_textbox(
+        slide_height = self.prs.slide_height
+        slide_width = self.prs.slide_width
+        assert slide_height is not None
+        assert slide_width is not None
+        text_box = slide.shapes.add_textbox(
             Inches(0.5),
-            self.prs.slide_height - Inches(1.0),
-            self.prs.slide_width - Inches(1),
+            slide_height - Inches(1.0),
+            slide_width - Inches(1),
             Inches(0.5),
         )
-        p = txBox.text_frame.paragraphs[0]
+        p = text_box.text_frame.paragraphs[0]
         p.text = text
         p.font.size = Pt(10)
         p.font.italic = True
@@ -149,12 +164,16 @@ class PptxBackend:
         from pptx.util import Inches
 
         slide = self._new_slide()
+        slide_width = self.prs.slide_width
+        slide_height = self.prs.slide_height
+        assert slide_width is not None
+        assert slide_height is not None
         n_cols = len(headers)
         n_rows = 1 + len(rows)
         left = Inches(0.5)
         top = Inches(0.5)
-        width = self.prs.slide_width - Inches(1)
-        height = self.prs.slide_height - Inches(1)
+        width = slide_width - Inches(1)
+        height = slide_height - Inches(1)
         table_shape = slide.shapes.add_table(n_rows, n_cols, left, top, width, height)
         table = table_shape.table
         for i, h in enumerate(headers):
@@ -170,7 +189,7 @@ class PptxBackend:
     # Native escape hatch
     # ------------------------------------------------------------------
 
-    def modify(self, fn: Callable[["Presentation"], None]) -> None:
+    def modify(self, fn: Callable[[Presentation], None]) -> None:
         """Run *fn* against the underlying python-pptx ``Presentation``."""
         fn(self.prs)
 

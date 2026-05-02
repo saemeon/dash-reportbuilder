@@ -107,7 +107,7 @@ def build_docx() -> Path:
     # table.style = "Light Grid Accent 1" itself.
 
     out = OUT_DIR / "example.docx"
-    doc.save(out)
+    doc.save(str(out))
     print(f"wrote {out}")
     return out
 
@@ -176,7 +176,7 @@ def build_pptx() -> Path:
                     run.font.size = PPTXPt(20)
 
     out = OUT_DIR / "example.pptx"
-    prs.save(out)
+    prs.save(str(out))
     print(f"wrote {out}")
     return out
 
