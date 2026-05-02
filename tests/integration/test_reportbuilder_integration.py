@@ -31,12 +31,30 @@ def _make_figure():
     )
 
 
-def _find_button(dash_duo, label):
-    for b in dash_duo.driver.find_elements(By.TAG_NAME, "button"):
-        text = dash_duo.driver.execute_script("return arguments[0].textContent", b)
+def _find_button_in(driver, label):
+    """Find a visible (interactable) button under *driver* by exact text match."""
+    for b in driver.find_elements(By.TAG_NAME, "button"):
+        if not b.is_displayed():
+            continue
+        text = driver.execute_script("return arguments[0].textContent", b)
         if text.strip() == label:
             return b
     return None
+
+
+def _find_button(dash_duo, label):
+    return _find_button_in(dash_duo.driver, label)
+
+
+def _open_report_builder(dash_duo):
+    """Open the Report Builder wizard so its inner buttons become interactable."""
+    trigger = _find_button(dash_duo, "Report Builder")
+    assert trigger is not None, "'Report Builder' trigger not found"
+    trigger.click()
+    # Wait for the modal to render (the '+ Heading' button becomes visible)
+    WebDriverWait(dash_duo.driver, 10).until(
+        lambda d: _find_button_in(d, "+ Heading") is not None
+    )
 
 
 def _build_app():
@@ -45,9 +63,11 @@ def _build_app():
     store = MemoryStore()
 
     graph = dcc.Graph(id="test-graph", figure=_make_figure())
+    # Use a unique trigger label so it doesn't collide with the report
+    # builder's internal "Export" button.
     wizard = capture_graph(
         graph,
-        trigger="Export",
+        trigger="Capture",
         strategy=plotly_strategy(),
         actions=[report_action(store)],
     )
@@ -70,6 +90,7 @@ def test_add_heading_button(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     btn = _find_button(dash_duo, "+ Heading")
     assert btn is not None, "'+ Heading' button not found"
@@ -94,6 +115,7 @@ def test_add_paragraph_button(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     btn = _find_button(dash_duo, "+ Paragraph")
     assert btn is not None
@@ -112,6 +134,7 @@ def test_add_multiple_items(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     # Add heading
     _find_button(dash_duo, "+ Heading").click()
@@ -141,6 +164,7 @@ def test_delete_item(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     # Add two items
     _find_button(dash_duo, "+ Heading").click()
@@ -211,6 +235,7 @@ def test_sortablejs_initializes(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     # Add items so the list is non-empty
     _find_button(dash_duo, "+ Heading").click()
@@ -240,6 +265,7 @@ def test_export_docx(dash_duo):
     app, store = _build_app()
     dash_duo.start_server(app)
     dash_duo.wait_for_element("#test-graph", timeout=10)
+    _open_report_builder(dash_duo)
 
     # Add an item first
     _find_button(dash_duo, "+ Heading").click()
