@@ -61,7 +61,13 @@ version = { attr = "dash_reportbuilder._version.__version__" }
 where = ["src"]
 
 [tool.setuptools.package-data]
-dash_reportbuilder = ["py.typed", "assets/*.js"]
+dash_reportbuilder = [
+    "py.typed",
+    "assets/*.js",
+    "templates/example.typ",
+    "templates/example.docx",
+    "templates/example.pptx",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

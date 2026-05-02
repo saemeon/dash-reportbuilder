@@ -25,6 +25,7 @@ from dash_reportbuilder.export._base import DocxTemplate, PptxTemplate, TypstTem
 from dash_reportbuilder.model import Report
 from dash_reportbuilder.protocols import ReportBackend, ReportElement
 from dash_reportbuilder.store import FileStore, MemoryStore, ReportStore
+from dash_reportbuilder.templates import example_template_path
 from dash_reportbuilder.viewer import report_viewer
 
 __all__ = [
@@ -57,4 +58,5 @@ __all__ = [
     "DocxTemplate",
     "PptxTemplate",
     "TypstTemplate",
+    "example_template_path",
 ]
