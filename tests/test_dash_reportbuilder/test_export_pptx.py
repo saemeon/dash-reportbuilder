@@ -55,7 +55,6 @@ def test_export_pptx_empty_report():
 
 def test_heading_creates_new_slide():
     """A heading item creates its own slide with a text box."""
-
     report = Report(title="Heading Test")
     report.append(HeadingElement(text="My Title", level=2))
 
@@ -70,7 +69,6 @@ def test_heading_creates_new_slide():
 
 def test_multiple_images_create_multiple_slides():
     """Each image gets its own slide."""
-
     report = Report(title="Multi Image")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
@@ -83,7 +81,6 @@ def test_multiple_images_create_multiple_slides():
 
 def test_page_break_resets_slide():
     """Page break sets current_slide to None, so next text item starts a new slide."""
-
     report = Report(title="Break Test")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(CaptionElement(text="Caption on image slide"))
@@ -97,7 +94,6 @@ def test_page_break_resets_slide():
 
 def test_caption_on_current_slide():
     """Caption/paragraph text goes on the current slide, not a new one."""
-
     report = Report(title="Caption Test")
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(CaptionElement(text="My Caption"))
@@ -113,7 +109,6 @@ def test_caption_on_current_slide():
 
 def test_paragraph_without_prior_slide_creates_one():
     """A paragraph with no prior slide creates a new slide."""
-
     report = Report(title="Orphan Paragraph")
     report.append(ParagraphElement(text="Standalone text"))
 
@@ -124,7 +119,6 @@ def test_paragraph_without_prior_slide_creates_one():
 
 def test_heading_then_image_creates_two_slides():
     """Heading and image each get their own slide."""
-
     report = Report(title="H+I")
     report.append(HeadingElement(text="Heading", level=2))
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
@@ -136,7 +130,6 @@ def test_heading_then_image_creates_two_slides():
 
 def test_caption_italic():
     """Caption text is italic."""
-
     report = Report()
     report.append(ImageElement(data_uri=_TINY_PNG_URI))
     report.append(CaptionElement(text="Italic caption"))
@@ -153,7 +146,6 @@ def test_caption_italic():
 
 def test_slides_report_slide_count(slides_report):
     """slides_report: heading(1 slide) + image(1 slide) + caption(on image slide) + page_break + image(1 slide) = 3 slides."""
-
     result = slides_report.export(PptxBackend())
     prs = _load_pptx(result)
     assert len(prs.slides) == 3
@@ -161,7 +153,6 @@ def test_slides_report_slide_count(slides_report):
 
 def test_multiple_page_breaks():
     """Multiple consecutive page breaks should not crash."""
-
     report = Report()
     report.append(PageBreakElement())
     report.append(PageBreakElement())

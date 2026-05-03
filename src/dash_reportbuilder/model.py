@@ -83,6 +83,7 @@ class Report:
     # ------------------------------------------------------------------
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize the report to a JSON-safe dict."""
         return {
             "title": self.title,
             "items": [it.to_dict() for it in self.items],
@@ -90,6 +91,7 @@ class Report:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Report:
+        """Reconstruct a report from a serialized dict."""
         return cls(
             title=data.get("title", "Untitled Report"),
             items=[element_from_dict(d) for d in data.get("items", [])],

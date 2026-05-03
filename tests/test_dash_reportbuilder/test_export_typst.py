@@ -23,7 +23,6 @@ def export_typst(report: Report, template: TypstTemplate | None = None) -> str:
 
 def test_export_typst_produces_string(sample_report):
 
-
     result = export_typst(sample_report)
     assert isinstance(result, str)
     assert "= Test Report" in result
@@ -36,7 +35,6 @@ def test_export_typst_produces_string(sample_report):
 
 def test_export_typst_escapes_special_chars():
 
-
     report = Report(title="Report #1")
     report.append(ParagraphElement(text="Price: $100 @user"))
     result = export_typst(report)
@@ -47,7 +45,6 @@ def test_export_typst_escapes_special_chars():
 
 def test_export_typst_empty_report():
 
-
     report = Report()
     result = export_typst(report)
     assert isinstance(result, str)
@@ -55,7 +52,6 @@ def test_export_typst_empty_report():
 
 
 def test_export_typst_custom_template():
-
 
     template = TypstTemplate(template='#set text(font: "Arial", size: 12pt)')
     report = Report(title="Custom")
@@ -73,14 +69,12 @@ class TestHeadingLevels:
 
     def test_heading_level_1(self):
 
-
         report = Report(title="T")
         report.append(HeadingElement(text="Top", level=1))
         result = export_typst(report)
         assert "\n= Top\n" in result
 
     def test_heading_level_2(self):
-
 
         report = Report(title="T")
         report.append(HeadingElement(text="Sub", level=2))
@@ -89,14 +83,12 @@ class TestHeadingLevels:
 
     def test_heading_level_3(self):
 
-
         report = Report(title="T")
         report.append(HeadingElement(text="SubSub", level=3))
         result = export_typst(report)
         assert "=== SubSub" in result
 
     def test_heading_default_level_is_2(self):
-
 
         report = Report(title="T")
         report.append(HeadingElement(text="Default", level=2))
@@ -110,7 +102,6 @@ class TestImageCaptionMeta:
 
     def test_image_with_caption(self):
 
-
         report = Report(title="T")
         report.append(ImageElement(data_uri=TINY_PNG_URI, caption="Figure 1"))
         result = export_typst(report)
@@ -118,7 +109,6 @@ class TestImageCaptionMeta:
         assert "Figure 1" in result
 
     def test_image_without_caption(self):
-
 
         report = Report(title="T")
         report.append(ImageElement(data_uri=TINY_PNG_URI))
@@ -138,7 +128,6 @@ class TestImageSequentialFilenames:
 
     def test_three_images(self):
 
-
         report = Report(title="T")
         report.append(ImageElement(data_uri=TINY_PNG_URI))
         report.append(ImageElement(data_uri=TINY_PNG_URI))
@@ -150,8 +139,6 @@ class TestImageSequentialFilenames:
 
     def test_images_interleaved_with_text(self):
         """Image counter only increments for image items."""
-
-
         report = Report(title="T")
         report.append(ImageElement(data_uri=TINY_PNG_URI))
         report.append(ParagraphElement(text="text"))
@@ -217,13 +204,11 @@ class TestTypstDefaultPreamble:
 
     def test_default_preamble(self):
 
-
         report = Report(title="T")
         result = export_typst(report)
         assert '#set text(font: "Calibri", size: 11pt)' in result
 
     def test_custom_font_in_default_preamble(self):
-
 
         template = TypstTemplate(font="Helvetica", font_size="14pt")
         report = Report(title="T")
@@ -236,7 +221,6 @@ class TestCaptionItem:
 
     def test_caption_item(self):
 
-
         report = Report(title="T")
         report.append(CaptionElement(text="Source: dataset"))
         result = export_typst(report)
@@ -247,7 +231,6 @@ class TestPageBreak:
     """Page break emits #pagebreak()."""
 
     def test_page_break_ordering(self):
-
 
         report = Report(title="T")
         report.append(ParagraphElement(text="Before"))

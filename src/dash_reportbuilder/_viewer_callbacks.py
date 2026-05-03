@@ -48,7 +48,6 @@ def register_viewer_callbacks(
     open_input: Input | None = None,
 ) -> None:
     """Register all viewer callbacks."""
-
     # ---- Arm/disarm polling when wizard opens/closes ----
     if open_input is not None:
 

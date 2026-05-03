@@ -17,9 +17,17 @@ from dash_reportbuilder.model import Report
 class ReportStore(Protocol):
     """Protocol for report storage backends."""
 
-    def get(self, session_id: str) -> Report: ...
-    def put(self, session_id: str, report: Report) -> None: ...
-    def delete(self, session_id: str) -> None: ...
+    def get(self, session_id: str) -> Report:
+        """Return the stored report for *session_id*."""
+        ...
+
+    def put(self, session_id: str, report: Report) -> None:
+        """Persist *report* under *session_id*."""
+        ...
+
+    def delete(self, session_id: str) -> None:
+        """Remove the stored report for *session_id*."""
+        ...
 
 
 class MemoryStore:
@@ -34,16 +42,19 @@ class MemoryStore:
         self._lock = threading.Lock()
 
     def get(self, session_id: str) -> Report:
+        """Return the report for *session_id*; create a blank one on first access."""
         with self._lock:
             if session_id not in self._reports:
                 self._reports[session_id] = Report()
             return self._reports[session_id]
 
     def put(self, session_id: str, report: Report) -> None:
+        """Persist *report* under *session_id*."""
         with self._lock:
             self._reports[session_id] = report
 
     def delete(self, session_id: str) -> None:
+        """Remove the stored report for *session_id*."""
         with self._lock:
             self._reports.pop(session_id, None)
 
@@ -75,6 +86,7 @@ class FileStore:
         return self._dir / f"{safe_id}.json"
 
     def get(self, session_id: str) -> Report:
+        """Return the report for *session_id*; load from disk or return blank."""
         path = self._path(session_id)
         with self._lock:
             if path.exists():
@@ -83,6 +95,7 @@ class FileStore:
             return Report()
 
     def put(self, session_id: str, report: Report) -> None:
+        """Persist *report* to disk under *session_id*."""
         path = self._path(session_id)
         with self._lock:
             path.write_text(
@@ -91,6 +104,7 @@ class FileStore:
             )
 
     def delete(self, session_id: str) -> None:
+        """Remove the report file for *session_id* if present."""
         path = self._path(session_id)
         with self._lock:
             path.unlink(missing_ok=True)

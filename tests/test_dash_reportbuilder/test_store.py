@@ -123,7 +123,7 @@ class TestFileStorePathSanitization:
             assert written_files[0].parent == Path(tmpdir)
 
     def test_get_after_sanitized_put(self):
-        """get with the same traversal ID finds the sanitized file."""
+        """Get with the same traversal ID finds the sanitized file."""
         with tempfile.TemporaryDirectory() as tmpdir:
             store = FileStore(tmpdir)
             report = Report(title="safe")

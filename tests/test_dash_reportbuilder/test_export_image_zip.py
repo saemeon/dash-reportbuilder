@@ -21,9 +21,13 @@ from dash_reportbuilder import (
 # Tiny 1×1 PNG
 TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGP4z8AAAAMBAQDJ/pLvAAAAAElFTkSuQmCC"
 # Tiny 1×1 GIF (different mime)
-TINY_GIF_URI = "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+TINY_GIF_URI = (
+    "data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=="
+)
 # A trivial inline SVG
-TINY_SVG_URI = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4="
+TINY_SVG_URI = (
+    "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4="
+)
 
 
 def _zip_names(data: bytes) -> list[str]:
@@ -70,13 +74,11 @@ class TestFilenames:
 
     def test_title_sanitized_of_unsafe_chars(self):
         report = Report(title="T")
-        report.append(
-            ImageElement(data_uri=TINY_PNG_URI, title="A/B: C*D? <evil>")
-        )
+        report.append(ImageElement(data_uri=TINY_PNG_URI, title="A/B: C*D? <evil>"))
         names = _zip_names(_export(report))
         # Only one file, no slashes/colons/etc.
         assert len(names) == 1
-        for ch in "/\\:*?<>\"":
+        for ch in '/\\:*?<>"':
             assert ch not in names[0]
 
     def test_duplicate_titles_disambiguate(self):
@@ -106,9 +108,7 @@ class TestMimeDetection:
 
     def test_unknown_mime_defaults_to_png(self):
         report = Report(title="T")
-        report.append(
-            ImageElement(data_uri="data:image/bogus;base64,iVBORw0KGgo=")
-        )
+        report.append(ImageElement(data_uri="data:image/bogus;base64,iVBORw0KGgo="))
         assert _zip_names(_export(report)) == ["image_001.png"]
 
 

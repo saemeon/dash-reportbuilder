@@ -158,9 +158,7 @@ class HtmlBackend:
         self._body_lines.append(f"<p>{html.escape(text)}</p>")
 
     def add_caption(self, text: str) -> None:
-        self._body_lines.append(
-            f'<p class="drb-caption">{html.escape(text)}</p>'
-        )
+        self._body_lines.append(f'<p class="drb-caption">{html.escape(text)}</p>')
 
     def add_table(self, headers: list[str], rows: list[list[str]]) -> None:
         self._body_lines.append("<table>")

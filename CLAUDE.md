@@ -111,7 +111,6 @@ src/dash_reportbuilder/
 │   └── _typst.py            # TypstBackend
 ├── export/
 │   ├── _base.py             # DocxTemplate, HtmlTemplate, PptxTemplate, TypstTemplate, decode_data_uri
-│   ├── _docx.py, _pptx.py, _typst.py  # export_*() shims (call new backends)
 ├── templates/               # Bundled example template assets
 │   ├── __init__.py          # example_template_path("docx" | "pptx" | "typst" | "html")
 │   ├── example.typ          # Branded Typst preamble (text)
@@ -142,7 +141,7 @@ From `dash_reportbuilder`:
 
 ## Testing
 
-- Unit tests: `cd dash-reportbuilder && uv run --active pytest tests/dash_reportbuilder/ --no-cov`
+- Unit tests: `cd dash-reportbuilder && uv run --active pytest tests/test_dash_reportbuilder/ --no-cov`
   (139 tests; all passing)
 - Integration tests (Selenium/Chrome, often flaky locally; auto-skipped on CI):
   `uv run --active pytest tests/integration/ --no-cov`
@@ -152,7 +151,7 @@ From `dash_reportbuilder`:
 Test conventions:
 
 - Tests use `pytest` fixtures from
-  [tests/dash_reportbuilder/conftest.py](tests/dash_reportbuilder/conftest.py).
+  [tests/test_dash_reportbuilder/conftest.py](tests/test_dash_reportbuilder/conftest.py).
   Shared constants (`TINY_PNG_URI`) are defined there.
 
 ## Conventions specific to this package

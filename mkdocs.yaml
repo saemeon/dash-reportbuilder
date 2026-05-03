@@ -1,0 +1,56 @@
+site_name: dash-reportbuilder
+site_description: Capture, assemble, and export reports from Plotly Dash applications
+repo_url: https://github.com/saemeon/dash-reportbuilder
+
+nav:
+  - Home: index.md
+  - User guide: user_guide.md
+  - API reference:
+      - Overview: api/index.md
+      - Model: api/model.md
+      - Elements: api/elements.md
+      - Backends: api/backends.md
+      - Templates: api/templates.md
+      - Store: api/store.md
+      - Viewer: api/viewer.md
+      - Protocols: api/protocols.md
+
+theme:
+  name: material
+  features:
+    - navigation.sections
+    - navigation.expand
+    - content.code.copy
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: numpy
+            show_if_no_docstring: false
+            show_root_toc_entry: false
+            show_source: false
+            heading_level: 3
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            merge_init_into_class: true
+            show_signature: true
+            separate_signature: true
+            annotations_path: source
+            filters: ["!^_[^_]"]
+  - mike:
+      canonical_version: latest
+      alias_type: redirect
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets

@@ -37,7 +37,7 @@ TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1
 
 
 def _build_report() -> Report:
-    """A report with one of every element type, including a titled image."""
+    """Build a report with one of every element type, including a titled image."""
     report = Report(title="Cross-Backend Report")
     report.append(HeadingElement(text="Section One", level=2))
     report.append(ParagraphElement(text="Some prose body."))
@@ -92,8 +92,11 @@ _FACTORIES: dict[str, Callable[[Report], bytes]] = {
 
 
 class TestEveryBackendProducesNonEmptyOutput:
-    """The same Report runs through every backend without crashing and
-    produces non-empty bytes."""
+    """Every backend produces non-empty bytes.
+
+    The same Report runs through every backend without crashing and
+    produces non-empty bytes.
+    """
 
     @pytest.mark.parametrize("name", list(_FACTORIES))
     def test_non_empty(self, name):
@@ -104,8 +107,11 @@ class TestEveryBackendProducesNonEmptyOutput:
 
 
 class TestTextContentReachesEachBackend:
-    """User-facing strings (heading, paragraph) appear in document
-    backends.  Image-only and binary backends are checked separately."""
+    """Text content reaches every text backend.
+
+    User-facing strings (heading, paragraph) appear in document
+    backends.  Image-only and binary backends are checked separately.
+    """
 
     @pytest.mark.parametrize(
         "name,decode",
@@ -183,8 +189,11 @@ class TestImageReachesEachBackend:
 
 
 class TestBackendsImplementProtocol:
-    """Every backend exposes the full primitive surface declared by the
-    ReportBackend Protocol."""
+    """Every backend implements the ReportBackend Protocol.
+
+    Every backend exposes the full primitive surface declared by the
+    ReportBackend Protocol.
+    """
 
     @pytest.mark.parametrize(
         "backend",
@@ -231,8 +240,11 @@ class TestBackendsImplementProtocol:
 
 
 class TestFileStoreReloadAndExport:
-    """Save a report, reload from a fresh FileStore, export — every
-    backend produces output equivalent to the in-memory path."""
+    """Reload then export matches in-memory export.
+
+    Save a report, reload from a fresh FileStore, export — every
+    backend produces output equivalent to the in-memory path.
+    """
 
     @pytest.mark.parametrize("name", list(_FACTORIES))
     def test_reloaded_export_matches_in_memory(self, name):

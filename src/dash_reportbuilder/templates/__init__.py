@@ -47,7 +47,6 @@ def example_template_path(format: Literal["docx", "pptx", "typst", "html"]) -> P
     """
     if format not in _FORMATS:
         raise ValueError(
-            f"Unknown template format: {format!r}. "
-            f"Expected one of {sorted(_FORMATS)}."
+            f"Unknown template format: {format!r}. Expected one of {sorted(_FORMATS)}."
         )
     return _ASSETS / _FORMATS[format]

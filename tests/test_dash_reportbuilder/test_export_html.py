@@ -212,5 +212,3 @@ class TestBackendType:
         text = data.decode("utf-8")
         assert "<h2>H</h2>" in text
         assert "<p>body</p>" in text
-
-

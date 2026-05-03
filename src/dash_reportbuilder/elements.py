@@ -34,9 +34,11 @@ class HeadingElement:
     type: ClassVar[str] = "heading"
 
     def render_into(self, backend: ReportBackend) -> None:
+        """Render into *backend*."""
         backend.add_heading(self.text, self.level)
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dict."""
         return {
             "id": self.id,
             "type": self.type,
@@ -46,6 +48,7 @@ class HeadingElement:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> HeadingElement:
+        """Reconstruct from a serialized dict."""
         return cls(id=data["id"], text=data["text"], level=data.get("level", 1))
 
 
@@ -59,13 +62,16 @@ class ParagraphElement:
     type: ClassVar[str] = "paragraph"
 
     def render_into(self, backend: ReportBackend) -> None:
+        """Render into *backend*."""
         backend.add_paragraph(self.text)
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dict."""
         return {"id": self.id, "type": self.type, "text": self.text}
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ParagraphElement:
+        """Reconstruct from a serialized dict."""
         return cls(id=data["id"], text=data["text"])
 
 
@@ -82,6 +88,7 @@ class ImageElement:
     type: ClassVar[str] = "image"
 
     def render_into(self, backend: ReportBackend) -> None:
+        """Render into *backend*."""
         backend.add_image(
             self.data_uri,
             title=self.title,
@@ -90,6 +97,7 @@ class ImageElement:
         )
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dict."""
         return {
             "id": self.id,
             "type": self.type,
@@ -101,6 +109,7 @@ class ImageElement:
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> ImageElement:
+        """Reconstruct from a serialized dict."""
         return cls(
             id=data["id"],
             data_uri=data["data_uri"],
@@ -120,13 +129,16 @@ class CaptionElement:
     type: ClassVar[str] = "caption"
 
     def render_into(self, backend: ReportBackend) -> None:
+        """Render into *backend*."""
         backend.add_caption(self.text)
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dict."""
         return {"id": self.id, "type": self.type, "text": self.text}
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> CaptionElement:
+        """Reconstruct from a serialized dict."""
         return cls(id=data["id"], text=data["text"])
 
 
@@ -139,13 +151,16 @@ class PageBreakElement:
     type: ClassVar[str] = "page_break"
 
     def render_into(self, backend: ReportBackend) -> None:
+        """Render into *backend*."""
         backend.add_page_break()
 
     def to_dict(self) -> dict[str, Any]:
+        """Serialize to a JSON-safe dict."""
         return {"id": self.id, "type": self.type}
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> PageBreakElement:
+        """Reconstruct from a serialized dict."""
         return cls(id=data["id"])
 
 

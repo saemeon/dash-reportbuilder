@@ -19,7 +19,6 @@ TINY_PNG_URI = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1
 
 def test_export_docx_produces_bytes(sample_report):
 
-
     result = sample_report.export(DocxBackend(title=sample_report.title))
     assert isinstance(result, bytes)
     assert len(result) > 100
@@ -29,15 +28,15 @@ def test_export_docx_produces_bytes(sample_report):
 
 def test_export_docx_with_template(sample_report):
 
-
     template = DocxTemplate(font="Arial", font_size_pt=12)
-    result = sample_report.export(DocxBackend(template=template, title=sample_report.title))
+    result = sample_report.export(
+        DocxBackend(template=template, title=sample_report.title)
+    )
     assert isinstance(result, bytes)
     assert result[:2] == b"PK"
 
 
 def test_export_docx_empty_report():
-
 
     report = Report()
     result = report.export(DocxBackend(title=report.title))
@@ -49,14 +48,13 @@ def test_export_docx_empty_report():
 
 
 def _load_docx(data: bytes):
-    """Helper: load bytes as a python-docx Document."""
+    """Load bytes as a python-docx Document."""
     from docx import Document
 
     return Document(io.BytesIO(data))
 
 
 def test_export_docx_only_images():
-
 
     report = Report(title="Images Only")
     report.append(ImageElement(data_uri=TINY_PNG_URI))
@@ -69,7 +67,6 @@ def test_export_docx_only_images():
 
 
 def test_export_docx_only_text():
-
 
     report = Report(title="Text Only")
     report.append(HeadingElement(text="Heading 1", level=2))
@@ -87,7 +84,6 @@ def test_export_docx_only_text():
 
 def test_export_docx_image_with_caption_meta():
 
-
     report = Report(title="Captioned Image")
     report.append(ImageElement(data_uri=TINY_PNG_URI, caption="Figure 1: My Chart"))
 
@@ -100,7 +96,6 @@ def test_export_docx_image_with_caption_meta():
 
 def test_export_docx_image_without_caption_meta():
 
-
     report = Report(title="No Caption")
     report.append(ImageElement(data_uri=TINY_PNG_URI))
 
@@ -110,7 +105,6 @@ def test_export_docx_image_without_caption_meta():
 
 
 def test_export_docx_heading_level_from_element():
-
 
     report = Report(title="Headings")
     report.append(HeadingElement(text="Level 1", level=1))
@@ -127,7 +121,6 @@ def test_export_docx_heading_level_from_element():
 
 def test_export_docx_page_break_does_not_crash():
 
-
     report = Report(title="With Breaks")
     report.append(ParagraphElement(text="Before break"))
     report.append(PageBreakElement())
@@ -138,10 +131,11 @@ def test_export_docx_page_break_does_not_crash():
 
 
 def test_export_docx_paragraph_count(sample_report):
-    """The sample_report has heading, image, paragraph, caption, page_break.
-    Verify the document has at least 3 text paragraphs (heading, paragraph, caption)."""
+    """Verify paragraph count for the sample report.
 
-
+    The sample_report has heading, image, paragraph, caption, page_break.
+    Verify the document has at least 3 text paragraphs (heading, paragraph, caption).
+    """
     result = sample_report.export(DocxBackend(title=sample_report.title))
     doc = _load_docx(result)
     non_empty = [p for p in doc.paragraphs if p.text.strip()]
@@ -149,7 +143,6 @@ def test_export_docx_paragraph_count(sample_report):
 
 
 def test_export_docx_custom_image_width():
-
 
     report = Report()
     report.append(ImageElement(data_uri=TINY_PNG_URI))
@@ -163,8 +156,6 @@ def test_export_docx_custom_image_width():
 
 def test_export_docx_all_element_types():
     """Exercise every element type in a single document without errors."""
-
-
     report = Report(title="All Types")
     report.append(HeadingElement(text="H", level=2))
     report.append(ImageElement(data_uri=TINY_PNG_URI))
