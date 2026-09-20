@@ -7,8 +7,8 @@ Run with:
 import numpy as np
 import plotly.graph_objects as go
 from dash import Dash, dcc, html
-
 from dash_capture import capture_graph, plotly_strategy
+
 from dash_reportbuilder import MemoryStore, report_action, report_viewer
 
 app = Dash(__name__)
